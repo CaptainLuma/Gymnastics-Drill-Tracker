@@ -1,0 +1,20 @@
+{
+  "name": "gymnastics-drill-tracker",
+  "productName": "Gymnastics Drill Tracker",
+  "version": "1.0.0",
+  "description": "App for managing and tracking gymnastics drills",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Aaron",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^43.1.1"
+  },
+  "electronmon": {
+    "patterns": [
+      "!data/drills.json"
+    ]
+  }
+}

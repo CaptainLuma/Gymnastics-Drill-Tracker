@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="script-src 'self'"
+    />
+    <title>Drill Tracker</title>
+
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <script src="./renderer.js" defer></script>
+</head>
+<body>
+    <div id="drill_list_view">
+        <h1>Gymnastics Drill Tracker</h1>
+
+        <div id="drill_list_controls">
+            <button id="save_button">Save</button>
+            <button id="add_drill_button">Add Drill</button>
+        </div>
+        <div id="drill_list">
+
+            <div class="drill">
+                <div class="drill_header">
+                    <div>
+                        <h3 class="drill_name">This is a Drill</h3>
+                        <div class="event_tags">
+                            <button class="event_tag">Vault</button>
+                            <button class="event_tag">Bar</button>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="expand_button">Expand</button>
+                        <div class="pin_button">
+                            <img class="pin_hollow_image" src="../images/pin-hollow.svg" alt="Pin">
+                            <img class="pin_filled_image" src="../images/pin-filled.svg" alt="Pinned" hidden>
+                        </div>
+                    </div>
+                </div>
+                <div class="drill_body" hidden>
+                    <div>
+                        <p class="drill_description">This is the description of the drill</p>
+                        <p class="level_tags_label">Recommended Levels:</p>
+                        <div class="level_tags">
+                            <button class="level_tag">Tan</button>
+                            <button class="level_tag">Bronze</button>
+                            <button class="level_tag">Purple</button>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="edit_button">Edit</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="add_edit_drill_view" hidden>
+        <h1 id="add_edit_drill_header">Add/Edit Drill</h1>
+
+        <!-- alert -->
+        <div id="add_edit_drill_alert_container"></div>
+
+        <div id="add_edit_form_div">
+            <div class="form">
+                <div class="horizontal_label_input_container">
+                    <label for="input_drill_name">Drill Name:</label>
+                    <input type="text" id="input_drill_name">
+                </div>
+                <div>
+                    <div class="label_container"><p>Events:</p></div>
+                    <div id="form_event_buttons">
+                    </div>
+                </div>
+                <div>
+                    <div class="label_container"><p>Recommended Levels:</p></div>
+                    <div id="form_level_buttons">
+                    </div>
+                </div>
+                <div>
+                    <div class="label_container"><label for="input_drill_description" class="form_label">Description:</label></div>
+                    <textarea id="input_drill_description" rows="5"></textarea>
+                </div>
+            </div>
+            <div class="form_buttons">
+                <button id="add_edit_drill_submit">Create</button>
+                <button id="return_button">Cancel</button>
+                <button id="delete_drill_button">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm_modal_outer_container" hidden>
+        <div id="confirm_modal_background">
+            <div id="confirm_modal">
+                <h3 id="confirm_modal_header">Are you sure?</h3>
+                <div class="modal_buttons">
+                    <button id="modal_no_button">No</button>
+                    <button id="modal_yes_button">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
