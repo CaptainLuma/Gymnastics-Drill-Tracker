@@ -4,7 +4,7 @@ import {
     displayAlert, 
     clearAlerts, 
     getMovedToFront, 
-    animateReorder } from "./helpers.js"
+    animateReposition } from "./helpers.js"
 import * as renderer from "./renderer.js"
 
 let drillUIElements = [] // holds references to the drill UI elements, their original drill object, and additional information including the order that they are displayed
@@ -147,8 +147,19 @@ function expandCollapseDrill(drillElement) {
     }
 
     drillUI.expanded = !drillUI.expanded
-    drillBody.hidden = !drillUI.expanded
     drillUI.element.querySelector(".expand_button").innerHTML = drillUI.expanded ? "Collapse" : "Expand"
+
+    // animate open/close
+    animateReposition(drillListElement, () => {
+        drillBody.hidden = !drillUI.expanded
+    })
+
+    // keep expanded/collapsed drill behind
+    drillUI.element.style.position = "relative"
+    drillUI.element.style.zIndex = "0"
+    drillUI.element.addEventListener("transitionend", () => {
+        drillUI.element.style.removeProperty("z-index");
+    }, { once: true });
 }
 
 function pinDrill(drillElement) {
@@ -163,18 +174,18 @@ function pinDrill(drillElement) {
 
     if (drillUI.drill.pinned) {
         // move to top
-        animateReorder(drillListElement, () => {
+        animateReposition(drillListElement, () => {
             drillListElement.insertBefore(drillUI.element, drillListElement.firstChild);
         });
     } else {
         // unpin (move below lowest pinned element)
         const lowestPinned = Array.from(drillListElement.children).findLast(el => el.dataset.pinned == "true")
-        animateReorder(drillListElement, () => {
+        animateReposition(drillListElement, () => {
             drillListElement.insertBefore(drillUI.element, lowestPinned ? lowestPinned.nextElementSibling : drillListElement.firstChild)
         });
     }
 
-    // keep pinned/unpinned drill on top
+    // keep pinned/unpinned drill on top during animation
     drillUI.element.style.position = "relative"
     drillUI.element.style.zIndex = "1000"
     drillUI.element.addEventListener("transitionend", () => {

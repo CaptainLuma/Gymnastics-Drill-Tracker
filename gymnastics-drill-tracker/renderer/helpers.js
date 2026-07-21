@@ -76,7 +76,7 @@ export function clearAlerts(alertContainer) {
     alertContainer.innerHTML = ""
 }
 
-export function animateReorder(parent, reorderFn) {
+export function animateReposition(parent, reorderFn) {
     const children = [...parent.children];
 
     // get positions before reorder
@@ -105,7 +105,7 @@ export function animateReorder(parent, reorderFn) {
     // animate elements back into place
     requestAnimationFrame(() => { // wait until next frame to not override previous action
         children.forEach(child => {
-            child.style.transition = "transform 500ms ease";
+            child.style.transition = "transform 400ms ease";
             child.style.transform = "";
         });
     });
