@@ -3,6 +3,7 @@ import * as renderer from "./renderer.js"
 
 let addEditMode = "add"
 let editDrillOriginalName = ""
+let changesMade = false
 
 // add edit page elements
 const drillListView = document.getElementById("drill_list_view")
@@ -21,7 +22,7 @@ let formLevelButtonsData = [] // contains data about each level event button, in
 
 // main buttons
 const addEditSubmitButton = document.getElementById("add_edit_drill_submit")
-const returnButton = document.getElementById("return_button")
+const cancelButton = document.getElementById("return_button")
 const deleteDrillButton = document.getElementById("delete_drill_button")
 
 // alerts
@@ -44,6 +45,8 @@ export function openDrillForm(drillName = null) {
     // clear form values
     addEditDrillForm.name.value = ""
     addEditDrillForm.description.value = ""
+
+    changesMade = false
 
     let drill = drillName != null ? renderer.getDrill(drillName) : null
     editDrillOriginalName = drillName
@@ -174,8 +177,15 @@ addEditSubmitButton.addEventListener("click", async (event) => {
     renderer.openDrillListView()
 })
 
-returnButton.addEventListener("click", (event) => {
-    renderer.openDrillListView()
+cancelButton.addEventListener("click", async (event) => {
+    if (changesMade) {
+        // ask user to confirm action
+        const response = await openConfirmModal(confirmModalContainer, "Return to Drill List?\nYour changes won't be saved.")
+        if (response)
+            renderer.openDrillListView()
+    } else {
+        renderer.openDrillListView()
+    }
 })
 
 deleteDrillButton.addEventListener("click", async (event) => {
@@ -184,10 +194,8 @@ deleteDrillButton.addEventListener("click", async (event) => {
     if (responce) {
         // TODO: create backup of drills.json
 
-        // delete the drill
         renderer.removeDrill(editDrillOriginalName)
-        
-        // save
+
         await renderer.saveDrills()
 
         // return to drill list
@@ -196,6 +204,7 @@ deleteDrillButton.addEventListener("click", async (event) => {
 })
 
 formEventButtonsElement.addEventListener("click", (e) => {
+    changesMade = true
     if (e.target.classList.contains("event_button")) {
         const buttonData = formEventButtonsData.find(x => x.element == e.target)
         if (buttonData) {
@@ -213,6 +222,7 @@ formEventButtonsElement.addEventListener("click", (e) => {
 })
 
 formLevelButtonsElement.addEventListener("click", (e) => {
+    changesMade = true
     if (e.target.classList.contains("level_button")) {
         const buttonData = formLevelButtonsData.find(x => x.element == e.target)
         if (buttonData) {
@@ -228,3 +238,6 @@ formLevelButtonsElement.addEventListener("click", (e) => {
         }
     }
 })
+
+addEditDrillForm.name.addEventListener("change", () => changesMade = true)
+addEditDrillForm.description.addEventListener("change", () => changesMade = true)
