@@ -35,7 +35,16 @@ export const levelData = {
     },
     "Tan": {
         backgroundColor: "rgb(201, 153, 127)"
-    }
+    },
+    "Bronze": {
+        backgroundColor: "rgb(158, 79, 37)"
+    },
+    "Purple": {
+        backgroundColor: "rgb(111, 25, 196)"
+    },
+    "Blue": {
+        backgroundColor: "rgb(43, 99, 241)"
+    },
 }
 
 export async function getDrills() {
