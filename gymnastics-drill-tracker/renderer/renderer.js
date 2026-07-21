@@ -1,3 +1,6 @@
+import { openConfirmModal, moveToFront, displayAlert, clearAlerts } from "./helpers.js"
+
+
 let drills = []
 
 let addEditMode = "add"
@@ -410,7 +413,7 @@ returnButton.addEventListener("click", (event) => {
 
 deleteDrillButton.addEventListener("click", async (event) => {
     // open delete modal
-    const responce = await openConfirmModal(`Are you sure you want to delete the drill\n"${editDrillOriginalName}"?`)
+    const responce = await openConfirmModal(confirmModalContainer, `Are you sure you want to delete the drill\n"${editDrillOriginalName}"?`)
     if (responce) {
         // TODO: create backup of drills.json
 
@@ -460,58 +463,6 @@ formLevelButtonsElement.addEventListener("click", (e) => {
         }
     }
 })
-
-
-// misc stuff
-
-// modal stuff
-async function openConfirmModal(message = "Are you sure?") {
-    return new Promise((resolve) => {
-        confirmModalHeader.innerText = message
-        confirmModalContainer.hidden = false
-
-        confirmModalYesButton.onclick = () => {
-            confirmModalContainer.hidden = true;
-            resolve(true)
-        }
-
-        confirmModalNoButton.onclick = () => {
-            confirmModalContainer.hidden = true;
-            resolve(false)
-        }
-    })
-}
-
-function moveToFront(array, predicate) {
-    array.sort((a, b) => {
-        const aMatch = predicate(a);
-        const bMatch = predicate(b);
-
-        if (aMatch === bMatch) return 0;
-        return aMatch ? -1 : 1;
-    });
-}
-
-function displayAlert(container, message, alert_severity = alertSeverities.danger) {
-    let template = document.createElement("div")
-    template.innerHTML = `
-    <div class="alert alert_danger">
-        <p class="alert_text">This is an alert</p>
-        <img class="alert_close_icon" src="../images/close-ellipse.svg" alt="close">
-    </div>
-    `
-
-    let element = template.firstElementChild
-
-    element.querySelector(".alert_text").innerText = message
-    element.querySelector(".alert_close_icon").onclick = () => element.remove()
-    
-    container.appendChild(element)
-}
-
-function clearAlerts(alertContainer) {
-    alertContainer.innerHTML = ""
-}
 
 // open drills list
 openDrillList()

@@ -1,0 +1,67 @@
+export function moveToFront(array, predicate) {
+    array.sort((a, b) => {
+        const aMatch = predicate(a);
+        const bMatch = predicate(b);
+
+        if (aMatch === bMatch) return 0;
+        return aMatch ? -1 : 1;
+    });
+}
+
+export function createElementFromTemplate(stringTemplate) {
+    const template = document.createElement("div")
+    template.innerHTML = stringTemplate
+    return template.firstElementChild
+}
+
+export async function openConfirmModal(container, message = "Are you sure?") {
+    container.innerHTML = `
+        <div class="confirm_modal_background">
+            <div class="confirm_modal">
+                <h3 class="confirm_modal_header">Are you sure?</h3>
+                <div class="modal_buttons">
+                    <button class="modal_no_button">No</button>
+                    <button class="modal_yes_button">Yes</button>
+                </div>
+            </div>
+        </div>
+    `
+    
+    container.querySelector(".confirm_modal_header").innerText = message
+    container.hidden = false
+    
+    return new Promise((resolve) => {
+        container.querySelector(".modal_yes_button").onclick = () => {
+            container.hidden = true;
+            container.innerHTML = ""
+            resolve(true)
+        }
+
+        container.querySelector(".modal_no_button").onclick = () => {
+            container.hidden = true;
+            container.innerHTML = ""
+            resolve(false)
+        }
+    })
+}
+
+export function displayAlert(container, message, alert_severity = alertSeverities.danger) {
+    let template = document.createElement("div")
+    template.innerHTML = `
+    <div class="alert alert_danger">
+        <p class="alert_text">This is an alert</p>
+        <img class="alert_close_icon" src="../images/close-ellipse.svg" alt="close">
+    </div>
+    `
+
+    let element = template.firstElementChild
+
+    element.querySelector(".alert_text").innerText = message
+    element.querySelector(".alert_close_icon").onclick = () => element.remove()
+    
+    container.appendChild(element)
+}
+
+export function clearAlerts(alertContainer) {
+    alertContainer.innerHTML = ""
+}

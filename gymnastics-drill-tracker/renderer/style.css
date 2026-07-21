@@ -182,7 +182,7 @@ input, textarea {
 
 
 /* modal stuff */
-#confirm_modal_background {
+.confirm_modal_background {
     position: fixed;
     top: 0;
     left: 0;
@@ -197,7 +197,7 @@ input, textarea {
     padding: 50px;
 }
 
-#confirm_modal {
+.confirm_modal {
     box-sizing: border-box;
     /* max-width: 500px;
     width: 100%; */
@@ -210,7 +210,7 @@ input, textarea {
     text-align: center;
 }
 
-#confirm_modal h3 {
+.confirm_modal h3 {
     margin-bottom: 20px;
 }
 
