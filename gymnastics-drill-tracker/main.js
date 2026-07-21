@@ -70,13 +70,6 @@ async function saveDrills(drills) {
     }
 }
 
-// ipcMain.on("requestGetDrills", (event, data) => {
-//     (async () => {
-//         const drills = await loadDrills()
-//         mainWindow.webContents.send('getDrills', drills)
-//     })();
-// })
-
 ipcMain.handle("getDrills", async () => {
     return await loadDrills()
 })

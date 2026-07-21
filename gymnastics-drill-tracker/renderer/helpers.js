@@ -8,6 +8,16 @@ export function moveToFront(array, predicate) {
     });
 }
 
+export function getMovedToFront(array, predicate) {
+    return array.toSorted((a, b) => {
+        const aMatch = predicate(a);
+        const bMatch = predicate(b);
+
+        if (aMatch === bMatch) return 0;
+        return aMatch ? -1 : 1;
+    });
+}
+
 export function createElementFromTemplate(stringTemplate) {
     const template = document.createElement("div")
     template.innerHTML = stringTemplate
@@ -64,4 +74,47 @@ export function displayAlert(container, message, alert_severity = alertSeveritie
 
 export function clearAlerts(alertContainer) {
     alertContainer.innerHTML = ""
+}
+
+export function animateReorder(parent, reorderFn) {
+    const children = [...parent.children];
+
+    // get positions before reorder
+    const first = new Map(
+        children.map(child => [child, child.getBoundingClientRect()])
+    );
+
+    // Perform the DOM changes.
+    reorderFn();
+
+    // get positions after reorder
+    const last = new Map(
+        children.map(child => [child, child.getBoundingClientRect()])
+    );
+
+    // instantly each element back to where it was using css transform (not changing DOM order)
+    children.forEach(child => {
+        const distanceY = first.get(child).top - last.get(child).top;
+
+        if (distanceY === 0) return;
+
+        child.style.transition = "none";
+        child.style.transform = `translateY(${distanceY}px)`;
+    });
+
+    // animate elements back into place
+    requestAnimationFrame(() => { // wait until next frame to not override previous action
+        children.forEach(child => {
+            child.style.transition = "transform 500ms ease";
+            child.style.transform = "";
+        });
+    });
+
+    // (cleanup) remove transition
+    children.forEach(child => {
+        child.addEventListener("transitionend", () => {
+            child.style.transition = "";
+            child.style.transform = ""
+        }, { once: true });
+    })
 }
