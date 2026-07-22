@@ -7,13 +7,6 @@ import {
     animateReposition } from "./helpers.js"
 import * as renderer from "./renderer.js"
 
-let drillUIElements = [] // holds references to the drill UI elements, their original drill object, and additional information including the order that they are displayed
-/* structure: {
-    drill: 
-    element:
-    expanded: false
-} */
-
 // drill list page elements
 const drillListView = document.getElementById("drill_list_view")
 const addEditDrillView = document.getElementById("add_edit_drill_view")
@@ -34,7 +27,7 @@ export async function openDrillList() {
     // refresh list
     await renderer.getDrills()
 
-    createDrillUIElements()
+    refreshListUI()
 }
 
 function constructDrillElement(drill) {
@@ -73,10 +66,11 @@ function constructDrillElement(drill) {
     let element = template.firstElementChild
 
     // set element content
-    element.dataset.id = drill.name;
-    element.dataset.pinned = drill.pinned;
-    element.querySelector(".drill_name").textContent = drill.name;
-    element.querySelector(".drill_description").textContent = drill.description;
+    element.dataset.id = drill.name
+    element.dataset.pinned = drill.pinned
+    element.dataset.expanded = "false"
+    element.querySelector(".drill_name").textContent = drill.name
+    element.querySelector(".drill_description").textContent = drill.description
     element.querySelector(".pin_hollow_image").hidden = drill.pinned
     element.querySelector(".pin_filled_image").hidden = !drill.pinned
 
@@ -109,34 +103,21 @@ function constructDrillElement(drill) {
     return element
 }
 
-function createDrillUIElements() {
-    // create elements
-    drillUIElements = renderer.drills.map(d => {
-        return {
-            drill: d,
-            element: constructDrillElement(d),
-            expanded: false
-        }
-    })
-
-    refreshListUI()
-}
-
 function refreshListUI() {
-    let drillUIsToDisplay = drillUIElements
+    let drillsToDisplay = renderer.drills
 
     // perform filtering
     let nameSubstring = nameSearchInput.value.trim().toLowerCase()
     if (nameSubstring != "")
-        drillUIsToDisplay = drillUIsToDisplay.filter(d => d.drill.name.toLowerCase().includes(nameSubstring))
+        drillsToDisplay = drillsToDisplay.filter(d => d.name.toLowerCase().includes(nameSubstring))
 
     // sort
-    moveToFront(drillUIsToDisplay, d => d.drill.pinned)
+    drillsToDisplay = getMovedToFront(drillsToDisplay, d => d.pinned)
 
     // add elements to DOM
     drillListElement.innerHTML = ""
-    drillUIsToDisplay.forEach(drillUI => {
-        drillListElement.appendChild(drillUI.element)
+    drillsToDisplay.forEach(drill => {
+        drillListElement.appendChild(constructDrillElement(drill))
     })
 }
 
@@ -148,61 +129,54 @@ function refreshListUI() {
 // }
 
 function expandCollapseDrill(drillElement) {
-    // find UI element
-    const drillUI = drillUIElements.find(d => d.drill.name === drillElement.dataset.id)
-    if (!drillUI)
-        throw new Error(`Couldn't find drill UI element for drillElement with name: ${drillElement.dataset.id}`)
+    const drillBody = drillElement.querySelector(".drill_body")
 
-    const drillBody = drillUI.element.querySelector(".drill_body")
-    if (drillBody == null) {
-        console.log("couldn't find drill body element")
-        return
-    }
-
-    drillUI.expanded = !drillUI.expanded
-    drillUI.element.querySelector(".expand_button").innerHTML = drillUI.expanded ? "Collapse" : "Expand"
+    drillElement.dataset.expanded = (drillElement.dataset.expanded == "true" ? "false" : "true") // toggle
+    let expanded = (drillElement.dataset.expanded == "true")
+    
+    drillElement.querySelector(".expand_button").innerHTML = expanded ? "Collapse" : "Expand"
 
     // animate open/close
     animateReposition(drillListElement, () => {
-        drillBody.hidden = !drillUI.expanded
+        drillBody.hidden = !expanded
     })
 
     // keep expanded/collapsed drill behind
-    drillUI.element.style.position = "relative"
-    drillUI.element.style.zIndex = "0"
-    drillUI.element.addEventListener("transitionend", () => {
-        drillUI.element.style.removeProperty("z-index");
+    drillElement.style.position = "relative"
+    drillElement.style.zIndex = "0"
+    drillElement.addEventListener("transitionend", () => {
+        drillElement.style.removeProperty("z-index");
     }, { once: true });
-}
+}   
 
 function pinDrill(drillElement) {
-    const drillUI = drillUIElements.find(d => d.drill.name === drillElement.dataset.id)
-    if (!drillUI)
-        throw new Error(`Couldn't find drill UI element for drillElement with name: ${drillElement.dataset.id}`)
+    const drill = renderer.drills.find(d => d.name === drillElement.dataset.id)
+    if (!drill)
+        throw new Error(`Couldn't find drill for drill DOM element with name: ${drillElement.dataset.id}`)
 
-    drillUI.drill.pinned = !drillUI.drill.pinned
-    drillUI.element.dataset.pinned = drillUI.drill.pinned
-    drillUI.element.querySelector(".pin_hollow_image").hidden = drillUI.drill.pinned
-    drillUI.element.querySelector(".pin_filled_image").hidden = !drillUI.drill.pinned
+    drill.pinned = !drill.pinned
+    drillElement.dataset.pinned = drill.pinned
+    drillElement.querySelector(".pin_hollow_image").hidden = drill.pinned
+    drillElement.querySelector(".pin_filled_image").hidden = !drill.pinned
 
-    if (drillUI.drill.pinned) {
+    if (drill.pinned) {
         // move to top
         animateReposition(drillListElement, () => {
-            drillListElement.insertBefore(drillUI.element, drillListElement.firstChild);
+            drillListElement.insertBefore(drillElement, drillListElement.firstChild);
         });
     } else {
         // unpin (move below lowest pinned element)
         const lowestPinned = Array.from(drillListElement.children).findLast(el => el.dataset.pinned == "true")
         animateReposition(drillListElement, () => {
-            drillListElement.insertBefore(drillUI.element, lowestPinned ? lowestPinned.nextElementSibling : drillListElement.firstChild)
+            drillListElement.insertBefore(drillElement, lowestPinned ? lowestPinned.nextElementSibling : drillListElement.firstChild)
         });
     }
 
     // keep pinned/unpinned drill on top during animation
-    drillUI.element.style.position = "relative"
-    drillUI.element.style.zIndex = "1000"
-    drillUI.element.addEventListener("transitionend", () => {
-        drillUI.element.style.removeProperty("z-index");
+    drillElement.style.position = "relative"
+    drillElement.style.zIndex = "1000"
+    drillElement.addEventListener("transitionend", () => {
+        drillElement.style.removeProperty("z-index");
     }, { once: true });
 }
 
