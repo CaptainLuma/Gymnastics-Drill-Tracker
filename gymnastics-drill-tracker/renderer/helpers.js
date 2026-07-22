@@ -56,16 +56,14 @@ export async function openConfirmModal(container, message = "Are you sure?") {
 }
 
 export function displayAlert(container, message, alert_severity = alertSeverities.danger) {
-    let template = document.createElement("div")
-    template.innerHTML = `
-    <div class="alert alert_danger">
-        <p class="alert_text">This is an alert</p>
-        <img class="alert_close_icon" src="../images/close-ellipse.svg" alt="close">
-    </div>
-    `
+    let element = createElementFromTemplate(`
+        <div class="alert">
+            <p class="alert_text">This is an alert</p>
+            <img class="alert_close_icon" src="../images/close-ellipse.svg" alt="close">
+        </div>
+    `)
 
-    let element = template.firstElementChild
-
+    element.classList.add(alert_severity)
     element.querySelector(".alert_text").innerText = message
     element.querySelector(".alert_close_icon").onclick = () => element.remove()
     
@@ -105,7 +103,7 @@ export function animateReposition(parent, reorderFn) {
     // animate elements back into place
     requestAnimationFrame(() => { // wait until next frame to not override previous action
         children.forEach(child => {
-            child.style.transition = "transform 400ms ease";
+            child.style.transition = "transform 500ms ease";
             child.style.transform = "";
         });
     });

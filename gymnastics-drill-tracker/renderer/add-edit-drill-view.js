@@ -27,6 +27,7 @@ const deleteDrillButton = document.getElementById("delete_drill_button")
 
 // alerts
 const addEditDrillAlerts = document.getElementById("add_edit_drill_alert_container")
+const drillListAlerts = document.getElementById("drill_list_alert_container")
 const alertSeverities = {
     info: "alert_info",
     danger: "alert_danger"
@@ -40,7 +41,8 @@ export function openDrillForm(drillName = null) {
     renderer.saveDrills()
 
     // clear alerts
-    addEditDrillAlerts.innerHTML = ""
+    clearAlerts(drillListAlerts)
+    clearAlerts(addEditDrillAlerts)
 
     // clear form values
     addEditDrillForm.name.value = ""
@@ -173,16 +175,21 @@ addEditSubmitButton.addEventListener("click", async (event) => {
     await renderer.saveDrills() // TODO: stay on page and display error message if saving fails
     console.log("succesfully saved added or edited drill")
 
+    clearAlerts(drillListAlerts)
+    displayAlert(drillListAlerts, `Drill "${drill.name}" has been ${addEditMode == "edit" ? "edited" : "added"}.`, alertSeverities.info)
+
     // return to main list
     renderer.openDrillListView()
 })
 
 cancelButton.addEventListener("click", async (event) => {
+    
     if (changesMade) {
         // ask user to confirm action
         const response = await openConfirmModal(confirmModalContainer, "Return to Drill List?\nYour changes won't be saved.")
-        if (response)
+        if (response) {
             renderer.openDrillListView()
+        }
     } else {
         renderer.openDrillListView()
     }
@@ -197,6 +204,9 @@ deleteDrillButton.addEventListener("click", async (event) => {
         renderer.removeDrill(editDrillOriginalName)
 
         await renderer.saveDrills()
+
+        clearAlerts(drillListAlerts)
+        displayAlert(drillListAlerts, `Drill "${editDrillOriginalName}" has been deleted.`, alertSeverities.info)
 
         // return to drill list
         renderer.openDrillListView()

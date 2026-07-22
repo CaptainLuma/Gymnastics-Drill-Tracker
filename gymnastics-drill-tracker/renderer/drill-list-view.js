@@ -12,7 +12,6 @@ let drillUIElements = [] // holds references to the drill UI elements, their ori
     drill: 
     element:
     expanded: false
-    
 } */
 
 // drill list page elements
@@ -25,15 +24,15 @@ const drillListElement = document.getElementById("drill_list")
 const saveButton = document.getElementById("save_button")
 const addDrillButton = document.getElementById("add_drill_button")
 
+// filter controls
+const nameSearchInput = document.getElementById("name_search_input")
+
 export async function openDrillList() {
     drillListView.hidden = false
     addEditDrillView.hidden = true
 
     // refresh list
     await renderer.getDrills()
-
-    // move pinned drills to top
-    // moveToFront(renderer.drills, (d => d.pinned))
 
     createDrillUIElements()
 }
@@ -120,9 +119,23 @@ function createDrillUIElements() {
         }
     })
 
+    refreshListUI()
+}
+
+function refreshListUI() {
+    let drillUIsToDisplay = drillUIElements
+
+    // perform filtering
+    let nameSubstring = nameSearchInput.value.trim().toLowerCase()
+    if (nameSubstring != "")
+        drillUIsToDisplay = drillUIsToDisplay.filter(d => d.drill.name.toLowerCase().includes(nameSubstring))
+
+    // sort
+    moveToFront(drillUIsToDisplay, d => d.drill.pinned)
+
     // add elements to DOM
     drillListElement.innerHTML = ""
-    getMovedToFront(drillUIElements, d => d.drill.pinned).forEach(drillUI => {
+    drillUIsToDisplay.forEach(drillUI => {
         drillListElement.appendChild(drillUI.element)
     })
 }
@@ -193,9 +206,8 @@ function pinDrill(drillElement) {
     }, { once: true });
 }
 
-// event listeners
 
-// drill buttons
+// event listeners
 drillListElement.addEventListener("click", (event) => {
     const drillElement = event.target.closest(".drill")
     if (!drillElement)
@@ -218,3 +230,5 @@ addDrillButton.addEventListener("click", () => {
 saveButton.addEventListener("click", () => {
     renderer.saveDrills()
 })
+
+nameSearchInput.addEventListener("change", () => refreshListUI())

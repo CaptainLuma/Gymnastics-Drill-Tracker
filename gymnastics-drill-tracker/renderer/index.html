@@ -13,15 +13,26 @@
     <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
+
+
+    
     <div id="drill_list_view">
         <h1>Gymnastics Drill Tracker</h1>
 
+        <!-- alert -->
+        <div id="drill_list_alert_container">
+            
+        </div>
+
         <div id="drill_list_controls">
+            <label for="name_search_input">Drill Name:</label>
+            <input id="name_search_input" type="text">
+
             <button id="save_button">Save</button>
             <button id="add_drill_button">Add Drill</button>
         </div>
-        <div id="drill_list">
 
+        <div id="drill_list">
             <div class="drill">
                 <div class="drill_header">
                     <div>
@@ -58,6 +69,11 @@
         </div>
     </div>
 
+
+
+
+
+
     <div id="add_edit_drill_view" hidden>
         <h1 id="add_edit_drill_header">Add/Edit Drill</h1>
 
@@ -92,6 +108,8 @@
             </div>
         </div>
     </div>
+
+
 
     <div id="confirm_modal_outer_container" hidden>
 
