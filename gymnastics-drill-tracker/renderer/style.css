@@ -138,13 +138,16 @@ h1 {
 label {
     font-size: 18px;
     margin-right: 15px;
-    /* display: inline-block; */
     display: flex;
     align-items: center;
 }
 
 .label_container {
     margin-bottom: 10px;
+    /* display: flex;
+    align-items: center; */
+    display: inline-block;
+    white-space: nowrap;
 }
 
 #input_drill_name {
@@ -263,59 +266,20 @@ input, textarea {
     cursor: pointer;
 }
 
-.event_tags {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin-left: auto;
-    gap: 5px;
-}
-
-.event_tag {
-    background-color: rgb(120, 120, 120);
-    color: white;
-    padding: 5px, 0px;
-    border-radius: 15px;
-    font-size: 16px;
-    display: block;
-    width: fit-content;
-    cursor: default;
-}
-
-#form_event_buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-}
-
-.event_button {
-    background-color: rgb(63, 63, 63);
-    color: rgb(185, 185, 185);
-    padding: 5px, 0px;
-    border-radius: 15px;
-    font-size: 16px;
-    display: block;
-    /* font-weight: 700; */
-}
-
-.event_button_selected {
-    background-color: rgb(150, 150, 150);
-    color: white;
-}
-
-.level_tags_label {
-    margin-bottom: 5px;
-}
-
+.event_tags,
 .level_tags {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    margin-left: auto;
     gap: 5px;
-    /* margin-bottom: 20px; */
 }
 
+.event_tags {
+    justify-content: flex-end;
+}
+
+.event_tag,
 .level_tag {
     background-color: rgb(120, 120, 120);
     color: white;
@@ -327,16 +291,17 @@ input, textarea {
     cursor: default;
 }
 
-.edit_button {
-    background-color: rgb(38, 106, 232);
-}
-
-#form_level_buttons {
+#form_event_buttons,
+#form_level_buttons,
+#event_filter_buttons,
+#level_filter_buttons {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 5px;
 }
 
+.event_button,
 .level_button {
     background-color: rgb(63, 63, 63);
     color: rgb(185, 185, 185);
@@ -344,14 +309,27 @@ input, textarea {
     border-radius: 15px;
     font-size: 16px;
     display: block;
+    height: min-content;
     /* font-weight: 700; */
 }
 
+.event_button_selected,
 .level_button_selected {
     color: white;
 }
 
+.level_tags_label {
+    margin-bottom: 5px;
+}
 
+.edit_button {
+    background-color: rgb(38, 106, 232);
+}
+
+.filter_container {
+    display: flex;
+    gap: 10px;
+}
 
 
 
@@ -368,4 +346,8 @@ input, textarea {
 .centered {
     display: flex;
     align-items: center;
+}
+
+.margin_bottom_1 {
+    margin-bottom: 20px;
 }

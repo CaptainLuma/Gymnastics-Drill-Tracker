@@ -1,6 +1,5 @@
 import { 
     openConfirmModal, 
-    moveToFront, 
     displayAlert, 
     clearAlerts, 
     getMovedToFront, 
@@ -19,6 +18,46 @@ const addDrillButton = document.getElementById("add_drill_button")
 
 // filter controls
 const nameSearchInput = document.getElementById("name_search_input")
+const eventFiltersContainer = document.getElementById("event_filter_buttons")
+const levelFiltersContainer = document.getElementById("level_filter_buttons")
+let eventFiltersData = []
+let levelFiltersData = []
+
+/**
+ * actions to be performed only once (when the app starts)
+ */
+export function onAppStart() {
+    // instantiate filter buttons
+    // event buttons
+    eventFiltersContainer.innerHTML = ""
+    eventFiltersData = []
+    for (const event of Object.keys(renderer.eventData)) {
+        let element = document.createElement("button")
+        element.classList.add("event_button")
+        element.innerText = event
+        eventFiltersContainer.appendChild(element)
+        eventFiltersData.push({
+            element: element,
+            eventName: event,
+            selected: false
+        })
+    }
+
+    // level buttons
+    levelFiltersContainer.innerHTML = ""
+    levelFiltersData = []
+    for (const level of Object.keys(renderer.levelData)) {
+        let element = document.createElement("button")
+        element.classList.add("level_button")
+        element.innerText = level
+        levelFiltersContainer.appendChild(element)
+        levelFiltersData.push({
+            element: element,
+            levelName: level,
+            selected: false
+        })
+    }
+}
 
 export async function openDrillList() {
     drillListView.hidden = false
@@ -111,10 +150,20 @@ function refreshListUI() {
     if (nameSubstring != "")
         drillsToDisplay = drillsToDisplay.filter(d => d.name.toLowerCase().includes(nameSubstring))
 
+    let selectedEvents = eventFiltersData.filter(x => x.selected).map(x => x.eventName)
+    selectedEvents.forEach(event => {
+        drillsToDisplay = drillsToDisplay.filter(d => d.events ? d.events.includes(event) : false)
+    })
+    
+    let selectedLevels = levelFiltersData.filter(x => x.selected).map(x => x.levelName)
+    selectedLevels.forEach(level => {
+        drillsToDisplay = drillsToDisplay.filter(d => d.levels ? d.levels.includes(level) : false)
+    })
+
     // sort
     drillsToDisplay = getMovedToFront(drillsToDisplay, d => d.pinned)
 
-    // add elements to DOM
+    // add elements to DOM (TODO, don't delete and recreate elements that are already in the DOM)
     drillListElement.innerHTML = ""
     drillsToDisplay.forEach(drill => {
         drillListElement.appendChild(constructDrillElement(drill))
@@ -206,3 +255,49 @@ saveButton.addEventListener("click", () => {
 })
 
 nameSearchInput.addEventListener("change", () => refreshListUI())
+
+eventFiltersContainer.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("event_button")) return
+
+    const buttonData = eventFiltersData.find(x => x.element == e.target)
+    if (!buttonData)
+        throw new Error("no button data found for target: ", e.target)
+
+    // toggle
+    buttonData.selected = !buttonData.selected
+
+    // update button UI (background color)
+    if (buttonData.selected) {
+        buttonData.element.classList.add("event_button_selected")
+        buttonData.element.style.backgroundColor = renderer.eventData[buttonData.eventName].backgroundColor
+    } else {
+        buttonData.element.classList.remove("event_button_selected")
+        buttonData.element.style.removeProperty("background-color");
+    }
+
+    // apply filter
+    refreshListUI()
+})
+
+levelFiltersContainer.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("level_button")) return
+
+    const buttonData = levelFiltersData.find(x => x.element == e.target)
+    if (!buttonData)
+        throw new Error("no button data found for target: ", e.target)
+
+    // toggle
+    buttonData.selected = !buttonData.selected
+
+    // update button UI (background color)
+    if (buttonData.selected) {
+        buttonData.element.classList.add("level_button_selected")
+        buttonData.element.style.backgroundColor = renderer.levelData[buttonData.levelName].backgroundColor
+    } else {
+        buttonData.element.classList.remove("level_button_selected")
+        buttonData.element.style.removeProperty("background-color");
+    }
+
+    // apply filter
+    refreshListUI()
+})

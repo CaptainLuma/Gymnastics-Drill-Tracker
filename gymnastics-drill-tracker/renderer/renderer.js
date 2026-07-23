@@ -80,5 +80,9 @@ export function openDrillFormView(drill = null) {
     addEditDrillView.openDrillForm(drill)
 }
 
+// initialize pages
+drillListView.onAppStart()
+addEditDrillView.onAppStart()
+
 // open drills list
 openDrillListView()

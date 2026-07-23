@@ -1,4 +1,4 @@
-import { openConfirmModal, moveToFront, displayAlert, clearAlerts } from "./helpers.js"
+import { openConfirmModal, displayAlert, clearAlerts } from "./helpers.js"
 import * as renderer from "./renderer.js"
 
 let addEditMode = "add"
@@ -35,6 +35,13 @@ const alertSeverities = {
 
 // modal elements
 const confirmModalContainer = document.getElementById("confirm_modal_outer_container")
+
+/**
+ * actions to be performed only once (when the app starts)
+ */
+export function onAppStart() {
+    
+}
 
 export function openDrillForm(drillName = null) {
     // save drills

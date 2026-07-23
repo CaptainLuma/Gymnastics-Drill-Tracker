@@ -1,13 +1,3 @@
-export function moveToFront(array, predicate) {
-    array.sort((a, b) => {
-        const aMatch = predicate(a);
-        const bMatch = predicate(b);
-
-        if (aMatch === bMatch) return 0;
-        return aMatch ? -1 : 1;
-    });
-}
-
 export function getMovedToFront(array, predicate) {
     return array.toSorted((a, b) => {
         const aMatch = predicate(a);
