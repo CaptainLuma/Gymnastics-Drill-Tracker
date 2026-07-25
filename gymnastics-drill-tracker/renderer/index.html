@@ -24,13 +24,17 @@
             
         </div>
 
+        <!-- <div class="horizontal_label_input_container margin_bottom_2">
+            
+        </div> -->
+
         <div class="filter_container">
             <div class="label_container"><p>Filter by Events:</p></div>
             <div id="event_filter_buttons">
                 
             </div>
         </div>
-        <div class="filter_container margin_bottom_1">
+        <div class="filter_container margin_bottom_2">
             <div class="label_container"><p>Filter by Level:</p></div>
             <div id="level_filter_buttons">
                 
@@ -40,7 +44,13 @@
         <div id="drill_list_controls">
             <label for="name_search_input">Filter by Name:</label>
             <input id="name_search_input" type="text">
-
+            <!-- <div><label class="label_container">Sort by:</label></div>
+            <select>
+                <option value="default">Default</option>
+                <option value="name">Name</option>
+                <option value="date">Date Created</option>
+            </select> -->
+            <button id="randomize_order_button">Randomize Order</button>
             <button id="save_button">Save</button>
             <button id="add_drill_button">Add Drill</button>
         </div>
@@ -100,17 +110,17 @@
                     <input type="text" id="input_drill_name">
                 </div>
                 <div>
-                    <div class="label_container"><p>Events:</p></div>
+                    <div class="label_container margin_botton_1"><p>Events:</p></div>
                     <div id="form_event_buttons">
                     </div>
                 </div>
                 <div>
-                    <div class="label_container"><p>Recommended Levels:</p></div>
+                    <div class="label_container margin_botton_1"><p>Recommended Levels:</p></div>
                     <div id="form_level_buttons">
                     </div>
                 </div>
                 <div>
-                    <div class="label_container"><label for="input_drill_description" class="form_label">Description:</label></div>
+                    <div class="label_container margin_botton_1"><label for="input_drill_description" class="form_label">Description:</label></div>
                     <textarea id="input_drill_description" rows="5"></textarea>
                 </div>
             </div>

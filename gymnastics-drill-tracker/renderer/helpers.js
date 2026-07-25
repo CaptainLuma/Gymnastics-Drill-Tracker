@@ -45,7 +45,7 @@ export async function openConfirmModal(container, message = "Are you sure?") {
     })
 }
 
-export function displayAlert(container, message, alert_severity = alertSeverities.danger) {
+export function displayAlert(container, message, alert_severity = "alert_info") {
     let element = createElementFromTemplate(`
         <div class="alert">
             <p class="alert_text">This is an alert</p>
@@ -105,4 +105,12 @@ export function animateReposition(parent, reorderFn) {
             child.style.transform = ""
         }, { once: true });
     })
+}
+
+export function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }

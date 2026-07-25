@@ -3,7 +3,8 @@ import {
     displayAlert, 
     clearAlerts, 
     getMovedToFront, 
-    animateReposition } from "./helpers.js"
+    animateReposition,
+    shuffle } from "./helpers.js"
 import * as renderer from "./renderer.js"
 
 // drill list page elements
@@ -22,6 +23,16 @@ const eventFiltersContainer = document.getElementById("event_filter_buttons")
 const levelFiltersContainer = document.getElementById("level_filter_buttons")
 let eventFiltersData = []
 let levelFiltersData = []
+
+// sort controls
+const randomizeOrderButton = document.getElementById("randomize_order_button")
+
+// alerts
+const drillListAlerts = document.getElementById("drill_list_alert_container")
+const alertSeverities = {
+    info: "alert_info",
+    danger: "alert_danger"
+}
 
 /**
  * actions to be performed only once (when the app starts)
@@ -64,7 +75,12 @@ export async function openDrillList() {
     addEditDrillView.hidden = true
 
     // refresh list
-    await renderer.getDrills()
+    let success = await renderer.getDrills()
+    if (!success) {
+        let filePath = await renderer.getDataFilePath()
+        clearAlerts(drillListAlerts)
+        displayAlert(drillListAlerts, `An unexpected error occured when loading drills. Please check the file path:\n${filePath}`, alertSeverities.danger)
+    }
 
     refreshListUI()
 }
@@ -75,13 +91,17 @@ function constructDrillElement(drill) {
     <div class="drill">
         <div class="drill_header">
             <div>
+                <!-- <button class="expand_button">Expand</button> -->
+                <div class="expand_button">
+                    <img class="expand_image" src="../images/dropdown.svg" alt="Expand">
+                </div>
                 <h3 class="drill_name"></h3>
                 <div class="event_tags">
 
                 </div>
             </div>
             <div>
-                <button class="expand_button">Expand</button>
+                <button class="edit_button">Edit</button>
                 <div class="pin_button">
                     <img class="pin_hollow_image" src="../images/pin-hollow.svg" alt="Pin">
                     <img class="pin_filled_image" src="../images/pin-filled.svg" alt="Pinned" hidden>
@@ -95,9 +115,6 @@ function constructDrillElement(drill) {
                 <div class="level_tags">
 
                 </div>
-            </div>
-            <div>
-                <button class="edit_button">Edit</button>
             </div>
         </div>
     </div>
@@ -142,8 +159,8 @@ function constructDrillElement(drill) {
     return element
 }
 
-function refreshListUI() {
-    let drillsToDisplay = renderer.drills
+function refreshListUI(randomSort = false) {
+    let drillsToDisplay = renderer.drills.slice() // copy array to not effect order of original array
 
     // perform filtering
     let nameSubstring = nameSearchInput.value.trim().toLowerCase()
@@ -154,13 +171,18 @@ function refreshListUI() {
     selectedEvents.forEach(event => {
         drillsToDisplay = drillsToDisplay.filter(d => d.events ? d.events.includes(event) : false)
     })
-    
+
     let selectedLevels = levelFiltersData.filter(x => x.selected).map(x => x.levelName)
     selectedLevels.forEach(level => {
         drillsToDisplay = drillsToDisplay.filter(d => d.levels ? d.levels.includes(level) : false)
     })
 
     // sort
+    if (randomSort) {
+        shuffle(drillsToDisplay)
+    }
+
+    // move pinned to front
     drillsToDisplay = getMovedToFront(drillsToDisplay, d => d.pinned)
 
     // add elements to DOM (TODO, don't delete and recreate elements that are already in the DOM)
@@ -183,7 +205,7 @@ function expandCollapseDrill(drillElement) {
     drillElement.dataset.expanded = (drillElement.dataset.expanded == "true" ? "false" : "true") // toggle
     let expanded = (drillElement.dataset.expanded == "true")
     
-    drillElement.querySelector(".expand_button").innerHTML = expanded ? "Collapse" : "Expand"
+    // drillElement.querySelector(".expand_button").innerHTML = expanded ? "Collapse" : "Expand"
 
     // animate open/close
     animateReposition(drillListElement, () => {
@@ -237,7 +259,7 @@ drillListElement.addEventListener("click", (event) => {
         return
 
     // determine button
-    if (event.target.classList.contains("expand_button")) {
+    if (event.target.classList.contains("expand_button") || event.target.classList.contains("expand_image")) {
         expandCollapseDrill(drillElement)
     } else if (event.target.classList.contains("pin_button") || event.target.parentElement.classList.contains("pin_button")) {
         pinDrill(drillElement)
@@ -300,4 +322,8 @@ levelFiltersContainer.addEventListener("click", (e) => {
 
     // apply filter
     refreshListUI()
+})
+
+randomizeOrderButton.addEventListener("click", () => {
+    refreshListUI(true)
 })

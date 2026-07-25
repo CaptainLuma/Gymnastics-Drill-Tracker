@@ -37,6 +37,12 @@ h1 {
     margin-bottom: 50px;
 }
 
+select {
+    background-color: var(--input-field-color);
+    color: var(--main-text-color);
+    /* height: min-content; */
+}
+
 #main {
     /* for some reason the scollbar appears without this line */
     border: 2px solid transparent;
@@ -89,11 +95,15 @@ h1 {
     margin: 0;
 } */
 
-.drill_header, 
-.drill_body 
-{
+.drill_header {
     display: grid;
-    grid-template-columns: 1fr 180px;
+    grid-template-columns: 1fr 140px;
+    border-bottom: var(--drill-border-style);
+}
+
+.drill_body {
+    /* display: grid;
+    grid-template-columns: 1fr 180px; */
     border-bottom: var(--drill-border-style);
 }
 
@@ -101,8 +111,7 @@ h1 {
     border-bottom: var(--drill-border-style);
 } */
 
-.drill_header > div:first-of-type, 
-.drill_body > div:first-of-type 
+.drill_header > div:first-of-type
 {
     border-right: var(--drill-border-style);
 }
@@ -143,10 +152,9 @@ label {
 }
 
 .label_container {
-    margin-bottom: 10px;
-    /* display: flex;
-    align-items: center; */
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    /* display: inline-block; */
     white-space: nowrap;
 }
 
@@ -185,8 +193,6 @@ input, textarea {
     margin-left: auto;
     background-color: var(--danger-color)
 }
-
-
 
 /* modal stuff */
 .confirm_modal_background {
@@ -231,6 +237,19 @@ input, textarea {
 /* .modal-buttons button {
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
 } */
+
+.expand_button {
+    height: 25px;
+    box-sizing: border-box;
+    /* margin-left: auto; */
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.expand_image {
+    height: 100%;
+    width: auto;
+}
 
 .pin_button {
     height: 25px;
@@ -329,9 +348,8 @@ input, textarea {
 .filter_container {
     display: flex;
     gap: 10px;
+    margin-bottom: 10px;
 }
-
-
 
 
 /* generic classes */
@@ -348,6 +366,10 @@ input, textarea {
     align-items: center;
 }
 
-.margin_bottom_1 {
+.margin_botton_1 {
+    margin-bottom: 10px;
+}
+
+.margin_bottom_2 {
     margin-bottom: 20px;
 }

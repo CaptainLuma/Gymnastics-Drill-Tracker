@@ -44,7 +44,7 @@ export function onAppStart() {
 }
 
 export function openDrillForm(drillName = null) {
-    // save drills
+    // save pinned drills n stuff
     renderer.saveDrills()
 
     // clear alerts
@@ -180,7 +180,7 @@ addEditSubmitButton.addEventListener("click", async (event) => {
     }
 
     await renderer.saveDrills() // TODO: stay on page and display error message if saving fails
-    console.log("succesfully saved added or edited drill")
+    // console.log("succesfully saved added or edited drill")
 
     clearAlerts(drillListAlerts)
     displayAlert(drillListAlerts, `Drill "${drill.name}" has been ${addEditMode == "edit" ? "edited" : "added"}.`, alertSeverities.info)
