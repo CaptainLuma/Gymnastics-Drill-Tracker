@@ -40,6 +40,7 @@ h1 {
 select {
     background-color: var(--input-field-color);
     color: var(--main-text-color);
+    padding: 2px 10px;
     /* height: min-content; */
 }
 
@@ -57,7 +58,7 @@ select {
 
 
 
-#save_button {
+#backup_button {
     margin-left: auto;
 }
 
@@ -67,7 +68,7 @@ select {
 
 #drill_list_view {
     padding: 30px;
-    max-width: 1000px;
+    max-width: 1100px;
     margin: auto;
     box-sizing: border-box;
 }
@@ -195,7 +196,7 @@ input, textarea {
 }
 
 /* modal stuff */
-.confirm_modal_background {
+.modal_background {
     position: fixed;
     top: 0;
     left: 0;
@@ -210,7 +211,7 @@ input, textarea {
     padding: 50px;
 }
 
-.confirm_modal {
+.modal {
     box-sizing: border-box;
     /* max-width: 500px;
     width: 100%; */
@@ -223,7 +224,7 @@ input, textarea {
     text-align: center;
 }
 
-.confirm_modal h3 {
+.modal h3 {
     margin-bottom: 20px;
 }
 
@@ -232,6 +233,13 @@ input, textarea {
     flex-direction: row;
     justify-content: center;
     gap: 30px;
+}
+
+#event_level_color {
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    width: 60px;
+    height: 40px;
 }
 
 /* .modal-buttons button {
@@ -349,6 +357,21 @@ input, textarea {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+}
+
+.inline_button {
+    /* background-color: var(--drill-secondary-background-color); */
+    background-color: rgb(0, 0, 0, 0);
+    color: rgb(185, 185, 185);
+    font-size: 16px;
+    padding: 2px 7px;
+    margin-left: 10px;
+}
+
+#add_edit_tag_modal_alert_text {
+    font-size: 16px;
+    color: red;
+    margin-bottom: 20px;
 }
 
 

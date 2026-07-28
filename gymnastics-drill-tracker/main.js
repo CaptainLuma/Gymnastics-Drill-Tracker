@@ -8,6 +8,8 @@ const isDev = process.env.NODE_ENV !== "production"
 const isMac = process.platform === 'darwin'
 
 let mainWindow
+let savedBeforeExit = false
+
 function createMainWindow() {
     mainWindow = new BrowserWindow({
         title: 'Drill Tracker',
@@ -37,14 +39,26 @@ app.whenReady().then(() => {
         if (BrowserWindow.getAllWindows().length == 0)
             createMainWindow()
     })
+
+    mainWindow.on("close", (event) => {
+        if (!savedBeforeExit) {
+            // prevent window from closing immediately
+            event.preventDefault()
+
+            // auto save
+            mainWindow.webContents.send('saveAndClose');
+        }
+    })
 })
 
-app.on("window-all-closed", () => {
+// win.on("window-all-closed", async (event) => {
+
+
+ipcMain.on("quitApp", () => {
+    savedBeforeExit = true
     if (!isMac)
         app.quit()
 })
-
-
 
 function getDataFilePath() {
     return path.join(__dirname, 'data');
@@ -81,15 +95,7 @@ async function loadEvents() {
 
         const data = await fs.readFile(filePath, 'utf8');
         let eventData = JSON.parse(data)
-
-        // convert to dictionary
-        // let eventDict = {}
-        // eventData.forEach(x => {
-        //     eventDict[x.name] = {
-        //         backgroundColor: x.backgroundColor
-        //     }
-        // });
-
+        
         return eventData
     } catch (error) {
         console.error('Failed to load events:', error);
@@ -104,14 +110,6 @@ async function loadLevels() {
         const data = await fs.readFile(filePath, 'utf8');
         let levelData = JSON.parse(data)
         
-        // convert to dictionary
-        // let levelDict = {}
-        // eventData.forEach(x => {
-        //     levelDict[x.name] = {
-        //         backgroundColor: x.backgroundColor
-        //     }
-        // });
-
         return levelData
     } catch (error) {
         console.error('Failed to load levels:', error);
@@ -176,6 +174,17 @@ async function saveLevels(levels) {
     }
 }
 
+async function copyAndRenameFile(sourcePath, destinationDir, newFileName) {
+  // Make sure the destination directory exists
+  await fs.mkdir(destinationDir, { recursive: true });
+
+  const destinationPath = path.join(destinationDir, newFileName);
+
+  await fs.copyFile(sourcePath, destinationPath);
+
+  return destinationPath;
+}
+
 ipcMain.handle("getDrills", async () => {
     return await loadDrills()
 })
@@ -205,4 +214,33 @@ ipcMain.handle("saveLevels", async (event, levels) => {
 
 ipcMain.handle("getDataFilePath", () => {
     return getDataFilePath()
+})
+
+ipcMain.handle("backupFiles", async () => {
+    const dataFolderPath = path.join(__dirname, 'data');
+    const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-");
+
+    console.log(`backing up files to folder: "${timestamp}"`)
+
+    await copyAndRenameFile(
+        path.join(dataFolderPath, 'drills.json'),
+        path.join(dataFolderPath, "backups", timestamp),
+        "drills-backup.json"
+    )
+
+    await copyAndRenameFile(
+        path.join(dataFolderPath, 'events.json'),
+        path.join(dataFolderPath, "backups", timestamp),
+        "events-backup.json"
+    )
+
+    await copyAndRenameFile(
+        path.join(dataFolderPath, 'levels.json'),
+        path.join(dataFolderPath, "backups", timestamp),
+        "levels-backup.json"
+    )
+
+    console.log("backed up files")
 })

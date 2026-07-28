@@ -14,7 +14,7 @@ const addEditDrillView = document.getElementById("add_edit_drill_view")
 const drillListElement = document.getElementById("drill_list")
 
 // drill list controls
-const saveButton = document.getElementById("save_button")
+const backupButton = document.getElementById("backup_button")
 const addDrillButton = document.getElementById("add_drill_button")
 
 // filter controls
@@ -38,18 +38,21 @@ const alertSeverities = {
  * actions to be performed only once (when the app starts)
  */
 export function onAppStart() {
-    // instantiate filter buttons
+    
+}
+
+function refreshFilterButtons() {
     // event buttons
     eventFiltersContainer.innerHTML = ""
     eventFiltersData = []
-    for (const event of Object.keys(renderer.eventData)) {
+    for (const eventID of Object.keys(renderer.eventData)) {
         let element = document.createElement("button")
         element.classList.add("event_button")
-        element.innerText = event
+        element.innerText = renderer.eventData[eventID].displayName
         eventFiltersContainer.appendChild(element)
         eventFiltersData.push({
             element: element,
-            eventName: event,
+            eventName: eventID,
             selected: false
         })
     }
@@ -57,14 +60,14 @@ export function onAppStart() {
     // level buttons
     levelFiltersContainer.innerHTML = ""
     levelFiltersData = []
-    for (const level of Object.keys(renderer.levelData)) {
+    for (const levelID of Object.keys(renderer.levelData)) {
         let element = document.createElement("button")
         element.classList.add("level_button")
-        element.innerText = level
+        element.innerText = renderer.levelData[levelID].displayName
         levelFiltersContainer.appendChild(element)
         levelFiltersData.push({
             element: element,
-            levelName: level,
+            levelName: levelID,
             selected: false
         })
     }
@@ -73,6 +76,8 @@ export function onAppStart() {
 export async function openDrillList() {
     drillListView.hidden = false
     addEditDrillView.hidden = true
+
+    refreshFilterButtons()
 
     // refresh list
     let success = await renderer.getDrills()
@@ -133,25 +138,33 @@ function constructDrillElement(drill) {
     // add event tags
     if (drill.events) {
         let eventTags = element.querySelector(".event_tags")
-        drill.events.forEach(event => {
+        drill.events.forEach(eventID => {
+            if (!renderer.eventData[eventID]) {
+                console.log(`drill contains event which is not recognized: "${eventID}"`)
+                return
+            }
+
             let tag = document.createElement("button")
             tag.classList.add("event_tag")
-            tag.innerText = event
+            tag.innerText = renderer.eventData[eventID].displayName
+            tag.style.backgroundColor = renderer.eventData[eventID].backgroundColor
             eventTags.appendChild(tag)
-            if (renderer.eventData[event])
-                tag.style.backgroundColor = renderer.eventData[event].backgroundColor
         })
     }
 
     // add level tags
     if (drill.levels) {
         let levelTags = element.querySelector(".level_tags")
-        drill.levels.forEach(level => {
+        drill.levels.forEach(levelID => {
+            if (!renderer.levelData[levelID]) {
+                console.log(`drill contains level which is not recognized: "${levelID}"`)
+                return
+            }
+
             let tag = document.createElement("button")
             tag.classList.add("level_tag")
-            tag.innerText = level
-            if (renderer.levelData[level])
-                tag.style.backgroundColor = renderer.levelData[level].backgroundColor
+            tag.innerText = renderer.levelData[levelID].displayName
+            tag.style.backgroundColor = renderer.levelData[levelID].backgroundColor
             levelTags.appendChild(tag)
         })
     }
@@ -272,10 +285,6 @@ addDrillButton.addEventListener("click", () => {
     renderer.openDrillFormView()
 })
 
-saveButton.addEventListener("click", () => {
-    renderer.saveDrills()
-})
-
 nameSearchInput.addEventListener("change", () => refreshListUI())
 
 eventFiltersContainer.addEventListener("click", (e) => {
@@ -326,4 +335,15 @@ levelFiltersContainer.addEventListener("click", (e) => {
 
 randomizeOrderButton.addEventListener("click", () => {
     refreshListUI(true)
+})
+
+backupButton.addEventListener("click", async () => {
+    try {
+        await renderer.backupFiles()
+        clearAlerts(drillListAlerts)
+        displayAlert(drillListAlerts, "successfully backed up files.", alertSeverities.info)
+    } catch {
+        clearAlerts(drillListAlerts)
+        displayAlert(drillListAlerts, "an unexpected error occured when trying to backup files", alertSeverities.danger)
+    }
 })

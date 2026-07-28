@@ -51,7 +51,7 @@
                 <option value="date">Date Created</option>
             </select> -->
             <button id="randomize_order_button">Randomize Order</button>
-            <button id="save_button">Save</button>
+            <button id="backup_button">Backup</button>
             <button id="add_drill_button">Add Drill</button>
         </div>
 
@@ -110,12 +110,20 @@
                     <input type="text" id="input_drill_name">
                 </div>
                 <div>
-                    <div class="label_container margin_botton_1"><p>Events:</p></div>
+                    <div class="label_container margin_botton_1">
+                        <p>Events:</p>
+                        <button class="inline_button" id="add_event_button">Add New</button>
+                        <button class="inline_button" id="edit_events_button">Edit</button>
+                    </div>
                     <div id="form_event_buttons">
                     </div>
                 </div>
                 <div>
-                    <div class="label_container margin_botton_1"><p>Recommended Levels:</p></div>
+                    <div class="label_container margin_botton_1">
+                        <p>Recommended Levels:</p>
+                        <button class="inline_button" id="add_level_button">Add New</button>
+                        <button class="inline_button" id="edit_levels_button">Edit</button>
+                    </div>
                     <div id="form_level_buttons">
                     </div>
                 </div>
@@ -136,6 +144,38 @@
 
     <div id="confirm_modal_outer_container" hidden>
 
+    </div>
+
+    <div id="add_edit_event_level_modal" hidden>
+        <div class="modal_background">
+            <div class="modal">
+                <h3 class="modal_header">Add Event</h3>
+
+                <p id="add_edit_tag_modal_alert_text" hidden></p>
+
+                <div id="event_level_original_name_section" class="horizontal_label_input_container margin_bottom_2" hidden>
+                    <label id="event_level_original_name_label" for="event_level_original_name">Level to Edit:</label>
+                    <select name="" id="event_level_original_name">
+                        <option value="">Default</option>
+                    </select>
+                </div>
+
+                <div class="horizontal_label_input_container margin_bottom_2">
+                    <label for="event_level_name">Name:</label>
+                    <input type="text" id="event_level_name">
+                </div>
+
+                <div class="horizontal_label_input_container margin_bottom_2">
+                    <label for="event_level_color">Color:</label>
+                    <input type="color" id="event_level_color">
+                </div>
+
+                <div class="modal_buttons">
+                    <button class="modal_no_button">Cancel</button>
+                    <button class="modal_yes_button">Create</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- load javascript -->

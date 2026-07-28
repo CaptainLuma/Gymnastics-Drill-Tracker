@@ -18,7 +18,10 @@ const alertSeverities = {
     danger: "alert_danger"
 }
 
-
+window.ipcRenderer.on("saveAndClose", async () => {
+    await window.ipcRenderer.invoke("saveDrills", drills)
+    window.ipcRenderer.send("quitApp")
+})
 
 export async function getDataFilePath() {
     return await window.ipcRenderer.invoke("getDataFilePath")
@@ -69,10 +72,12 @@ export async function saveDrills() {
         await window.ipcRenderer.invoke("saveDrills", drills)
 }
 
-// export async function saveEvents() {
-//     if (success)
-//         await window.ipcRenderer.invoke("saveEvents", events)
-// }
+export async function saveEventsAndLevels() {
+    if (success) {
+        await window.ipcRenderer.invoke("saveEvents", eventData)
+        await window.ipcRenderer.invoke("saveLevels", levelData)
+    }
+}
 
 export function removeDrill(drillName) {
     drills = drills.filter(d => d.name !== drillName)
@@ -93,6 +98,11 @@ export function openDrillListView() {
 
 export function openDrillFormView(drill = null) {
     addEditDrillView.openDrillForm(drill)
+}
+
+export async function backupFiles() {
+    console.log("backing up files")
+    await window.ipcRenderer.invoke("backupFiles")
 }
 
 async function initialize() {

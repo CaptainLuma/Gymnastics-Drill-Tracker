@@ -14,7 +14,9 @@
   },
   "electronmon": {
     "patterns": [
-      "!data/drills.json"
+      "!data/drills.json",
+      "!data/events.json",
+      "!data/levels.json"
     ]
   }
 }

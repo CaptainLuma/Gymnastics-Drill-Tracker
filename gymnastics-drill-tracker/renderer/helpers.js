@@ -16,9 +16,9 @@ export function createElementFromTemplate(stringTemplate) {
 
 export async function openConfirmModal(container, message = "Are you sure?") {
     container.innerHTML = `
-        <div class="confirm_modal_background">
-            <div class="confirm_modal">
-                <h3 class="confirm_modal_header">Are you sure?</h3>
+        <div class="modal_background">
+            <div class="modal">
+                <h3 class="modal_header">Are you sure?</h3>
                 <div class="modal_buttons">
                     <button class="modal_no_button">No</button>
                     <button class="modal_yes_button">Yes</button>
@@ -27,7 +27,7 @@ export async function openConfirmModal(container, message = "Are you sure?") {
         </div>
     `
     
-    container.querySelector(".confirm_modal_header").innerText = message
+    container.querySelector(".modal_header").innerText = message
     container.hidden = false
     
     return new Promise((resolve) => {
@@ -113,4 +113,23 @@ export function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+export function rgbToHex(rgb) {
+    const [r, g, b] = rgb.match(/\d+/g).map(Number);
+
+    return (
+        "#" +
+        [r, g, b]
+            .map(n => n.toString(16).padStart(2, "0"))
+            .join("")
+    );
+}
+
+export function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    return `rgb(${r}, ${g}, ${b})`;
 }
