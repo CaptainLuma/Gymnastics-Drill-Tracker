@@ -404,7 +404,7 @@ tagModalElements.createButton.addEventListener("click", () => {
     }
 
     // ADD/EDIT tag
-    success = addEditTag()
+    let success = addEditTag()
 
     if (!success)
         return
@@ -429,7 +429,7 @@ tagModalElements.deleteButton.addEventListener("click", async () => {
     
     console.log(tagID)
     console.log(type)
-    console.log(renderer.drills.filter(drill => drill.events[tagID] != undefined))
+    console.log(renderer.drills.filter(drill => drill.events.includes(tagID)))
 
     if (numDrillsUsingTag > 0) {
         console.log(`can't delete this ${type} because it (${numDrillsUsingTag}) drills are using it.`)
