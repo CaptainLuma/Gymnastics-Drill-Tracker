@@ -50,6 +50,10 @@
                 <option value="name">Name</option>
                 <option value="date">Date Created</option>
             </select> -->
+
+            <label id="result_limit_label" for="result_limit">Show Top:</label>
+            <input id="result_limit" type="number" min="0" step="1">
+
             <button id="randomize_order_button">Randomize Order</button>
             <button id="backup_button">Backup</button>
             <button id="add_drill_button">Add Drill</button>
@@ -106,7 +110,7 @@
         <div id="add_edit_form_div">
             <div class="form">
                 <div class="horizontal_label_input_container">
-                    <label for="input_drill_name">Drill Name:</label>
+                    <label id="input_drill_name_label" for="input_drill_name">Drill Name:</label>
                     <input type="text" id="input_drill_name">
                 </div>
                 <div>

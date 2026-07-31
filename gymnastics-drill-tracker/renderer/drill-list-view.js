@@ -24,6 +24,8 @@ const levelFiltersContainer = document.getElementById("level_filter_buttons")
 let eventFiltersData = []
 let levelFiltersData = []
 
+const resultLimitInput = document.getElementById("result_limit")
+
 // sort controls
 const randomizeOrderButton = document.getElementById("randomize_order_button")
 
@@ -178,16 +180,16 @@ function refreshListUI(randomSort = false) {
     // perform filtering
     let nameSubstring = nameSearchInput.value.trim().toLowerCase()
     if (nameSubstring != "")
-        drillsToDisplay = drillsToDisplay.filter(d => d.name.toLowerCase().includes(nameSubstring))
+        drillsToDisplay = drillsToDisplay.filter(d => d.pinned || d.name.toLowerCase().includes(nameSubstring))
 
     let selectedEvents = eventFiltersData.filter(x => x.selected).map(x => x.eventName)
     selectedEvents.forEach(event => {
-        drillsToDisplay = drillsToDisplay.filter(d => d.events ? d.events.includes(event) : false)
+        drillsToDisplay = drillsToDisplay.filter(d => d.pinned || (d.events ? d.events.includes(event) : false))
     })
 
     let selectedLevels = levelFiltersData.filter(x => x.selected).map(x => x.levelName)
     selectedLevels.forEach(level => {
-        drillsToDisplay = drillsToDisplay.filter(d => d.levels ? d.levels.includes(level) : false)
+        drillsToDisplay = drillsToDisplay.filter(d => d.pinned || (d.levels ? d.levels.includes(level) : false))
     })
 
     // sort
@@ -203,6 +205,38 @@ function refreshListUI(randomSort = false) {
     drillsToDisplay.forEach(drill => {
         drillListElement.appendChild(constructDrillElement(drill))
     })
+
+    limitResults()
+}
+
+function limitResults() {
+    if (
+        resultLimitInput.value == "" || 
+        resultLimitInput.valueAsNumber == NaN ||
+        resultLimitInput.valueAsNumber < 1
+    ) {
+        // show all
+        Array.from(drillListElement.children).forEach(child => child.hidden = false)
+        return
+    }
+    
+    Array.from(drillListElement.children).forEach(child => child.hidden = true)
+    
+    let numPinned = 0
+    for (let i = 0; i < drillListElement.children.length; i++) {
+        if (drillListElement.children[i].dataset.pinned != "true") {
+            break
+        }
+        numPinned++
+    }
+
+    let numberElementsToShow = numPinned + resultLimitInput.valueAsNumber
+
+    for (let i = 0; i < numberElementsToShow; i++) {
+        if (i >= drillListElement.children.length)
+            break
+        drillListElement.children[i].hidden = false
+    }
 }
 
 // function getDrillDomElement(drillName) {
@@ -262,6 +296,8 @@ function pinDrill(drillElement) {
     drillElement.addEventListener("transitionend", () => {
         drillElement.style.removeProperty("z-index");
     }, { once: true });
+
+    limitResults()
 }
 
 
@@ -347,3 +383,5 @@ backupButton.addEventListener("click", async () => {
         displayAlert(drillListAlerts, "an unexpected error occured when trying to backup files", alertSeverities.danger)
     }
 })
+
+resultLimitInput.addEventListener("change", () => limitResults())

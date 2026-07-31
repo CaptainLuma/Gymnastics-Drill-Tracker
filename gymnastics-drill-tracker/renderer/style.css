@@ -147,7 +147,7 @@ select {
 
 label {
     font-size: 18px;
-    margin-right: 15px;
+    /* margin-right: 10px; */
     display: flex;
     align-items: center;
 }
@@ -157,11 +157,6 @@ label {
     align-items: center;
     /* display: inline-block; */
     white-space: nowrap;
-}
-
-#input_drill_name {
-    flex: 1;
-    box-sizing: border-box;
 }
 
 .horizontal_label_input_container {
@@ -178,6 +173,24 @@ input, textarea {
     background-color: var(--input-field-color);
     color: var(--main-text-color);
     padding-left: 6px;
+}
+
+#input_drill_name_label {
+    margin-right: 10px;
+}
+
+#input_drill_name {
+    flex: 1;
+    box-sizing: border-box;
+}
+
+#result_limit_label {
+    margin-left: 20px;
+    /* margin-right: 0px; */
+}
+
+#result_limit {
+    width: 50px
 }
 
 .form > div {
