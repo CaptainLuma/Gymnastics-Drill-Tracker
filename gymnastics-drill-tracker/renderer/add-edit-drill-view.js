@@ -56,6 +56,7 @@ const tagModalElements = {
     colorInput: addEditTagModal.querySelector("#event_level_color"),
     cancelButton: addEditTagModal.querySelector(".modal_no_button"),
     createButton: addEditTagModal.querySelector(".modal_yes_button"),
+    deleteButton: addEditTagModal.querySelector("#delete_tag_button"),
     alertText: addEditTagModal.querySelector("#add_edit_tag_modal_alert_text")
 }
 
@@ -315,20 +316,14 @@ function openAddEditEventLevelModal(type, mode) {
     if (!tagModalElements.originalNameSection.hidden) {
         // create select element options
         tagModalElements.originalNameSelectElement.innerHTML = ""
-        if (type == "event") {
-            for (const eventID of Object.keys(renderer.eventData)) {
-                let optionElement = document.createElement("option")
-                optionElement.value = eventID
-                optionElement.innerText = renderer.eventData[eventID].displayName
-                tagModalElements.originalNameSelectElement.appendChild(optionElement)
-            }
-        } else {
-            for (const levelID of Object.keys(renderer.levelData)) {
-                let optionElement = document.createElement("option")
-                optionElement.value = levelID
-                optionElement.innerText = renderer.levelData[levelID].displayName
-                tagModalElements.originalNameSelectElement.appendChild(optionElement)
-            }
+        const tagData = type == "event" ?
+            renderer.eventData : renderer.levelData
+
+        for (const tagID of Object.keys(tagData)) {
+            let optionElement = document.createElement("option")
+            optionElement.value = tagID
+            optionElement.innerText = tagData[tagID].displayName
+            tagModalElements.originalNameSelectElement.appendChild(optionElement)
         }
 
         autoFillTagModalInputs()
@@ -336,85 +331,56 @@ function openAddEditEventLevelModal(type, mode) {
 }
 
 function autoFillTagModalInputs() {
-    if (addEditTagModal.dataset.type == "event") {
-        tagModalElements.nameInput.value = renderer.eventData[tagModalElements.originalNameSelectElement.value].displayName
-        tagModalElements.colorInput.value = rgbToHex(renderer.eventData[tagModalElements.originalNameSelectElement.value].backgroundColor)
-    } else {
-        tagModalElements.nameInput.value = renderer.levelData[tagModalElements.originalNameSelectElement.value].displayName
-        tagModalElements.colorInput.value = rgbToHex(renderer.levelData[tagModalElements.originalNameSelectElement.value].backgroundColor)
-    }
+    const tagData = addEditTagModal.dataset.type == "event" ?
+        renderer.eventData : renderer.levelData
+    
+    tagModalElements.nameInput.value = tagData[tagModalElements.originalNameSelectElement.value].displayName
+    tagModalElements.colorInput.value = rgbToHex(tagData[tagModalElements.originalNameSelectElement.value].backgroundColor)
 }
 
-function addEditEvent() {
+function addEditTag() {
+    const tagData = addEditTagModal.dataset.type == "event" ?
+        renderer.eventData : renderer.levelData
+
     if (addEditTagModal.dataset.mode == "edit") {
-        // update tag
-        let event = renderer.eventData[tagModalElements.originalNameSelectElement.value]
+        // EDIT TAG
+
+        let tag = tagData[tagModalElements.originalNameSelectElement.value]
+        let newDisplayName = tagModalElements.nameInput.value.trim()
 
         // ensure unique display name
-        if (Object.values(renderer.eventData).find(x => x.displayName == event.displayName)) {
+        if (newDisplayName != tag.displayName && Object.values(tagData).find(x => x.displayName == newDisplayName)) {
             tagModalElements.alertText.innerText = `There is already an event with this name.`
             tagModalElements.alertText.hidden = false
             return false
         }
 
-        event.displayName = tagModalElements.nameInput.value.trim()
-        event.backgroundColor = hexToRgb(tagModalElements.colorInput.value)
+        tag.displayName = newDisplayName
+        tag.backgroundColor = hexToRgb(tagModalElements.colorInput.value)
     } else {
-        let event = {
+        // ADD TAG
+
+        let tag = {
             displayName: tagModalElements.nameInput.value.trim(),
             backgroundColor: hexToRgb(tagModalElements.colorInput.value)
         }
 
-        let id = event.displayName
+        let id = tag.displayName
 
         // ensure unique display name
-        if (Object.values(renderer.eventData).find(x => x.displayName == event.displayName)) {
+        if (Object.values(tagData).find(x => x.displayName == tag.displayName)) {
             tagModalElements.alertText.innerText = `There is already an event with this name.`
             tagModalElements.alertText.hidden = false
             return false
         }
 
         // ensure unique ID
-        while (renderer.eventData[id]) {
+        while (tagData[id]) {
             id = crypto.randomUUID()
         }
 
-        // add event
-        renderer.eventData[id] = event
-    }
-
-    return true
-}
-
-function addEditLevel() {
-    if (addEditTagModal.dataset.mode == "edit") {
-        // update tag
-        let level = renderer.levelData[tagModalElements.originalNameSelectElement.value]
-
-        level.displayName = tagModalElements.nameInput.value.trim()
-        level.backgroundColor = hexToRgb(tagModalElements.colorInput.value)
-    } else {
-        let level = {
-            displayName: tagModalElements.nameInput.value.trim(),
-            backgroundColor: hexToRgb(tagModalElements.colorInput.value)
-        }
-
-        let id = level.displayName
-
-        // ensure unique display name
-        if (Object.values(renderer.levelData).find(x => x.displayName == level.displayName)) {
-            tagModalElements.alertText.innerText = `There is already a level with this name.`
-            tagModalElements.alertText.hidden = false
-            return false
-        }
-
-        // ensure unique ID
-        while (renderer.levelData[id]) {
-            id = crypto.randomUUID()
-        }
-
-        // add event
-        renderer.levelData[id] = level
+        // add tag
+        tagData[id] = tag
     }
 
     return true
@@ -438,12 +404,7 @@ tagModalElements.createButton.addEventListener("click", () => {
     }
 
     // ADD/EDIT tag
-    let success = false
-    if (addEditTagModal.dataset.type == "event") {
-        success = addEditEvent()
-    } else {
-        success = addEditLevel()
-    }
+    success = addEditTag()
 
     if (!success)
         return
@@ -455,4 +416,31 @@ tagModalElements.createButton.addEventListener("click", () => {
 
     // refresh UI
     refreshEventAndLevelButtons()
+})
+
+tagModalElements.deleteButton.addEventListener("click", async () => {
+    // check if tag is used
+    let tagID = tagModalElements.originalNameSelectElement.value
+    let type = addEditTagModal.dataset.type
+
+    let numDrillsUsingTag = type == "event" ?
+        renderer.drills.filter(drill => drill.events[tagID] != undefined).length :
+        renderer.drills.filter(drill => drill.levels[tagID] != undefined).length
+    
+    console.log(tagID)
+    console.log(type)
+    console.log(renderer.drills.filter(drill => drill.events[tagID] != undefined))
+
+    if (numDrillsUsingTag > 0) {
+        console.log(`can't delete this ${type} because it (${numDrillsUsingTag}) drills are using it.`)
+        return
+    }
+
+    // ask user to confirm action
+    // const response = await openConfirmModal(confirmModalContainer, `Are you sure you want to delete this tag"?`)
+    // if (response) {
+        
+    // }
+
+    console.log("deleting tag...")
 })

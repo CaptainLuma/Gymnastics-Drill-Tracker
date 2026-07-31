@@ -42,7 +42,14 @@
         </div>
 
         <div id="drill_list_controls">
-            <label for="name_search_input">Filter by Name:</label>
+            <label for="name_search_input">
+                Filter by
+                <select id="text_search_type">
+                    <option value="name">Name</option>
+                    <option value="description">Description</option>
+                    <option value="both">Name & Desc</option>
+                </select>
+            </label>
             <input id="name_search_input" type="text">
             <!-- <div><label class="label_container">Sort by:</label></div>
             <select>
@@ -177,6 +184,7 @@
                 <div class="modal_buttons">
                     <button class="modal_no_button">Cancel</button>
                     <button class="modal_yes_button">Create</button>
+                    <button id="delete_tag_button">Delete</button>
                 </div>
             </div>
         </div>

@@ -387,6 +387,19 @@ input, textarea {
     margin-bottom: 20px;
 }
 
+#text_search_type {
+    margin-left: 5px;
+    padding: 3px 2px;
+}
+
+#add_edit_event_level_modal input,
+#add_edit_event_level_modal select {
+    margin-left: 5px;
+}
+
+#delete_tag_button {
+    background-color: var(--danger-color);
+}
 
 /* generic classes */
 .border {

@@ -18,7 +18,8 @@ const backupButton = document.getElementById("backup_button")
 const addDrillButton = document.getElementById("add_drill_button")
 
 // filter controls
-const nameSearchInput = document.getElementById("name_search_input")
+const textSearchInput = document.getElementById("name_search_input")
+const textSearchType = document.getElementById("text_search_type")
 const eventFiltersContainer = document.getElementById("event_filter_buttons")
 const levelFiltersContainer = document.getElementById("level_filter_buttons")
 let eventFiltersData = []
@@ -178,9 +179,32 @@ function refreshListUI(randomSort = false) {
     let drillsToDisplay = renderer.drills.slice() // copy array to not effect order of original array
 
     // perform filtering
-    let nameSubstring = nameSearchInput.value.trim().toLowerCase()
-    if (nameSubstring != "")
-        drillsToDisplay = drillsToDisplay.filter(d => d.pinned || d.name.toLowerCase().includes(nameSubstring))
+
+    console.log(textSearchType.value)
+
+    // filter by name & description input
+    let terms = textSearchInput.value.trim().toLowerCase().split(" ")
+    drillsToDisplay = drillsToDisplay.filter(drill => {
+        if (drill.pinned)
+            return true
+
+        let textToSearch
+
+        if (textSearchType.value == "name") {
+            textToSearch = drill.name
+        } else if (textSearchType.value == "description") {
+            textToSearch = drill.description
+        } else {
+            textToSearch = drill.name + " " + drill.description
+        }
+
+        // return if name or description includes at least one of the terms
+        return terms.some(term => textToSearch.toLowerCase().includes(term)); 
+    })
+
+
+    // if (nameSearchString != "")
+    //     drillsToDisplay = drillsToDisplay.filter(d => d.pinned || d.name.toLowerCase().includes(nameSearchString))
 
     let selectedEvents = eventFiltersData.filter(x => x.selected).map(x => x.eventName)
     selectedEvents.forEach(event => {
@@ -321,7 +345,7 @@ addDrillButton.addEventListener("click", () => {
     renderer.openDrillFormView()
 })
 
-nameSearchInput.addEventListener("change", () => refreshListUI())
+textSearchInput.addEventListener("change", () => refreshListUI())
 
 eventFiltersContainer.addEventListener("click", (e) => {
     if (!e.target.classList.contains("event_button")) return
@@ -385,3 +409,4 @@ backupButton.addEventListener("click", async () => {
 })
 
 resultLimitInput.addEventListener("change", () => limitResults())
+textSearchType.addEventListener("change", () => refreshListUI())
