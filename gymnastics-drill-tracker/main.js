@@ -55,14 +55,11 @@ app.whenReady().then(() => {
 
 
 ipcMain.on("quitApp", () => {
+    console.log("quitting app")
     savedBeforeExit = true
     if (!isMac)
         app.quit()
 })
-
-function getDataFilePath() {
-    return path.join(__dirname, 'data');
-}
 
 async function loadDrills() {
     try {
@@ -119,6 +116,9 @@ async function loadLevels() {
 
 async function saveDrills(drills) {
     try {
+        // Make sure the destination directory exists
+        await fs.mkdir(path.join(__dirname, 'data'), { recursive: true });
+        
         const filePath = path.join(__dirname, 'data', 'drills.json');
         const data = JSON.stringify(drills, null, 2);
 
@@ -141,6 +141,9 @@ async function saveEvents(events) {
     // }
 
     try {
+        // Make sure the destination directory exists
+        await fs.mkdir(path.join(__dirname, 'data'), { recursive: true });
+
         const filePath = path.join(__dirname, 'data', 'events.json');
         const data = JSON.stringify(events, null, 2);
 
@@ -163,6 +166,9 @@ async function saveLevels(levels) {
     // }
 
     try {
+        // Make sure the destination directory exists
+        await fs.mkdir(path.join(__dirname, 'data'), { recursive: true });
+
         const filePath = path.join(__dirname, 'data', 'levels.json');
         const data = JSON.stringify(levels, null, 2);
 
@@ -212,10 +218,6 @@ ipcMain.handle("saveLevels", async (event, levels) => {
     return
 })
 
-ipcMain.handle("getDataFilePath", () => {
-    return getDataFilePath()
-})
-
 ipcMain.handle("backupFiles", async () => {
     const dataFolderPath = path.join(__dirname, 'data');
     const timestamp = new Date()
@@ -243,4 +245,19 @@ ipcMain.handle("backupFiles", async () => {
     )
 
     console.log("backed up files")
+})
+
+ipcMain.handle("getFileExists", async (event, pathElements) => {
+    const fullPath = path.join(__dirname, ...pathElements)
+
+    try {
+        await fs.access(fullPath);
+        return true;
+    } catch {
+        return false;
+    }
+})
+
+ipcMain.handle("getPath", (event, pathElements) => {
+    return path.join(__dirname, ...pathElements)
 })

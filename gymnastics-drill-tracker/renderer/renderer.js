@@ -1,15 +1,26 @@
 import { 
     displayAlert, 
-    clearAlerts, } from "./helpers.js"
+    clearAlerts, 
+    openErrorModal, 
+    openConfirmModal
+} from "./helpers.js"
 
 import * as drillListView from "./drill-list-view.js"
 import * as addEditDrillView from "./add-edit-drill-view.js"
 
-export let drills = []
+export let drills = [
+    {
+        name: "This is an example drill",
+        description: "This is an example drill. Feel free to edit, or delete it.",
+        events: [],
+        levels: [],
+        pinned: false
+    },
+]
 export let eventData = {}
 export let levelData = {}
 
-export let success = true
+let loadSuccessful = false
 
 // alerts
 const drillListAlerts = document.getElementById("drill_list_alert_container")
@@ -18,48 +29,47 @@ const alertSeverities = {
     danger: "alert_danger"
 }
 
+// modal
+const confirmModalContainer = document.getElementById("confirm_modal_outer_container")
+
 window.ipcRenderer.on("saveAndClose", async () => {
-    await window.ipcRenderer.invoke("saveDrills", drills)
+    await saveDrills()
     window.ipcRenderer.send("quitApp")
 })
 
-export async function getDataFilePath() {
-    return await window.ipcRenderer.invoke("getDataFilePath")
-}
-
 export async function getDrills() {
-    drills = await window.ipcRenderer.invoke("getDrills")
+    const retrievedDrills = await window.ipcRenderer.invoke("getDrills")
 
-    if (drills == null) {
-        // an error has occured
-        drills = []
-        success = false
-        return false
+    if (retrievedDrills == null) {
+        return false // an error has occured
     }
+
+    drills = retrievedDrills
+
     return true
 }
 
 export async function getEvents() {
-    eventData = await window.ipcRenderer.invoke("getEvents")
+    const retrievedEvents = await window.ipcRenderer.invoke("getEvents")
 
-    if (eventData == null) {
-        // an error has occured
-        eventData = {}
-        success = false
-        return false
+    if (retrievedEvents == null) {
+        return false // an error has occured
     }
+
+    eventData = retrievedEvents
+
     return true
 }
 
 export async function getLevels() {
-    levelData = await window.ipcRenderer.invoke("getLevels")
+    const retrievedLevels = await window.ipcRenderer.invoke("getLevels")
 
-    if (levelData == null) {
-        // an error has occured
-        levelData = {}
-        success = false
-        return false
+    if (retrievedLevels == null) {
+        return false // an error has occured
     }
+
+    levelData = retrievedLevels
+
     return true
 }
 
@@ -68,15 +78,16 @@ export function getDrill(drillName) {
 }
 
 export async function saveDrills() {
-    if (success) // don't save if failed to load drills. This could erase data.
-        await window.ipcRenderer.invoke("saveDrills", drills)
+    if (!loadSuccessful) return // don't save if couldn't successfully load data. This could result in loss of data
+    
+    await window.ipcRenderer.invoke("saveDrills", drills)
 }
 
 export async function saveEventsAndLevels() {
-    if (success) {
-        await window.ipcRenderer.invoke("saveEvents", eventData)
-        await window.ipcRenderer.invoke("saveLevels", levelData)
-    }
+    if (!loadSuccessful) return
+    
+    await window.ipcRenderer.invoke("saveEvents", eventData)
+    await window.ipcRenderer.invoke("saveLevels", levelData)
 }
 
 export function removeDrill(drillName) {
@@ -105,28 +116,74 @@ export async function backupFiles() {
     await window.ipcRenderer.invoke("backupFiles")
 }
 
+export async function getPath(pathElements) {
+    return await window.ipcRenderer.invoke("getPath", pathElements)
+}
+
 async function initialize() {
+    let drillsFileExists = await window.ipcRenderer.invoke("getFileExists", ["data", "drills.json"])
+    let eventsFileExists = await window.ipcRenderer.invoke("getFileExists", ["data", "events.json"])
+    let levelsFileExists = await window.ipcRenderer.invoke("getFileExists", ["data", "levels.json"])
+
+    if ((!drillsFileExists) && (!eventsFileExists) && (!levelsFileExists)) {
+        let responce = await openConfirmModal(confirmModalContainer, `No data was found on your system.\n Do you wish to create new data?`)
+
+        if (responce) {
+            // create new data
+            await window.ipcRenderer.invoke("saveDrills", drills)
+            await window.ipcRenderer.invoke("saveEvents", eventData)
+            await window.ipcRenderer.invoke("saveLevels", levelData)
+        } else {
+            // alert user of error
+            let filePath = await window.ipcRenderer.invoke("getPath", ["data"])
+            
+            await openErrorModal(confirmModalContainer, `No data was found on your system. Please check the folder:\n"${filePath}"\n`, "Exit")
+
+            window.ipcRenderer.send("quitApp")
+            return
+        }
+    }
+
     // load event and level data
+    let drillsSuccess = await getDrills()
     let eventsSuccess = await getEvents()
     let levelsSuccess = await getLevels()
 
-    clearAlerts(drillListAlerts)
+    if (!drillsSuccess) {
+        let filePath = await window.ipcRenderer.invoke("getPath", ["data", "drills.json"])
+
+        await openErrorModal(confirmModalContainer, `An unexpected error occured when loading drills. Please check the file path:\n${filePath}`, "Exit")
+
+        window.ipcRenderer.send("quitApp")
+        return
+    }
+
     if (!eventsSuccess) {
-        let filePath = await getDataFilePath()
-        displayAlert(drillListAlerts, `An unexpected error occured when loading events. Please check the file path:\n${filePath}`, alertSeverities.danger)
+        let filePath = await window.ipcRenderer.invoke("getPath", ["data", "events.json"])
+
+        await openErrorModal(confirmModalContainer, `An unexpected error occured when loading events. Please check the file path:\n"${filePath}"`, "Exit")
+
+        window.ipcRenderer.send("quitApp")
+        return
     }
 
     if (!levelsSuccess) {
-        let filePath = await getDataFilePath()
-        displayAlert(drillListAlerts, `An unexpected error occured when loading levels. Please check the file path:\n${filePath}`, alertSeverities.danger)
+        let filePath = await window.ipcRenderer.invoke("getPath", ["data", "levels.json"])
+
+        await openErrorModal(confirmModalContainer, `An unexpected error occured when loading levels. Please check the file path:\n${filePath}`, "Exit")
+
+        window.ipcRenderer.send("quitApp")
+        return
     }
+
+    loadSuccessful = true
 
     // initialize pages
     drillListView.onAppStart()
     addEditDrillView.onAppStart()
 
     // open drills list
-    openDrillListView()
+    openDrillListView(false)
 }
 
 initialize()

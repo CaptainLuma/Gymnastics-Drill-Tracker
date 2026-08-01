@@ -208,7 +208,6 @@ addEditSubmitButton.addEventListener("click", async (event) => {
     }
 
     await renderer.saveDrills() // TODO: stay on page and display error message if saving fails
-    // console.log("succesfully saved added or edited drill")
 
     clearAlerts(drillListAlerts)
     displayAlert(drillListAlerts, `Drill "${drill.name}" has been ${addEditMode == "edit" ? "edited" : "added"}.`, alertSeverities.info)
@@ -308,6 +307,7 @@ function openAddEditEventLevelModal(type, mode) {
     tagModalElements.originalNameLabel.innerText = `${typeCapitalized} to edit:`
     tagModalElements.originalNameSection.hidden = mode != "edit"
     tagModalElements.createButton.innerText = mode == "edit" ? "Edit" : "Create"
+    tagModalElements.deleteButton.hidden = mode != "edit"
 
     // reset form values
     tagModalElements.nameInput.value = ""
@@ -391,12 +391,17 @@ editEventsButton.addEventListener("click", () => openAddEditEventLevelModal("eve
 addLevelButton.addEventListener("click", () => openAddEditEventLevelModal("level", "add"))
 editLevelsButton.addEventListener("click", () => openAddEditEventLevelModal("level", "edit"))
 
-tagModalElements.originalNameSelectElement.addEventListener("change", () => autoFillTagModalInputs())
+tagModalElements.originalNameSelectElement.addEventListener("change", () => {
+    tagModalElements.alertText.hidden = true
+    autoFillTagModalInputs()
+})
 
 tagModalElements.cancelButton.addEventListener("click", () => addEditTagModal.hidden = true)
 tagModalElements.createButton.addEventListener("click", () => {
+    const mode = addEditTagModal.dataset.mode
+    const type = addEditTagModal.dataset.type
+    
     tagModalElements.alertText.hidden = true
-
     if (tagModalElements.nameInput.value.trim() == "") {
         tagModalElements.alertText.innerText = `Name cannot be empty.`
         tagModalElements.alertText.hidden = false
@@ -416,31 +421,48 @@ tagModalElements.createButton.addEventListener("click", () => {
 
     // refresh UI
     refreshEventAndLevelButtons()
+
+    clearAlerts(addEditDrillAlerts)
+    displayAlert(addEditDrillAlerts, `Succesfully ${mode == "edit" ? "edited" : "added"} ${type}.`, alertSeverities.info)
 })
 
 tagModalElements.deleteButton.addEventListener("click", async () => {
-    // check if tag is used
+    // check if tag is being used in any drills
     let tagID = tagModalElements.originalNameSelectElement.value
     let type = addEditTagModal.dataset.type
 
     let numDrillsUsingTag = type == "event" ?
-        renderer.drills.filter(drill => drill.events[tagID] != undefined).length :
-        renderer.drills.filter(drill => drill.levels[tagID] != undefined).length
-    
-    console.log(tagID)
-    console.log(type)
-    console.log(renderer.drills.filter(drill => drill.events.includes(tagID)))
+        renderer.drills.filter(drill => drill.events.includes(tagID)).length :
+        renderer.drills.filter(drill => drill.levels.includes(tagID)).length
 
     if (numDrillsUsingTag > 0) {
-        console.log(`can't delete this ${type} because it (${numDrillsUsingTag}) drills are using it.`)
+        tagModalElements.alertText.innerText = `can't delete this ${type}\nbecause (${numDrillsUsingTag}) drills are using it.`
+        tagModalElements.alertText.hidden = false
         return
     }
 
     // ask user to confirm action
-    // const response = await openConfirmModal(confirmModalContainer, `Are you sure you want to delete this tag"?`)
-    // if (response) {
-        
-    // }
+    const response = await openConfirmModal(confirmModalContainer, `Are you sure you want to delete this ${type}?`)
+    if (!response) {
+        return
+    }
 
-    console.log("deleting tag...")
+    // delete tag
+    if (type == "event") {
+        delete renderer.eventData[tagID]
+    } else {
+        delete renderer.levelData[tagID]
+    }
+
+    // close modal
+    addEditTagModal.hidden = true
+
+    // save
+    renderer.saveEventsAndLevels()
+
+    // refresh UI
+    refreshEventAndLevelButtons()
+
+    clearAlerts(addEditDrillAlerts)
+    displayAlert(addEditDrillAlerts, `Succesfully deleted ${type}.`, alertSeverities.info)
 })

@@ -76,18 +76,20 @@ function refreshFilterButtons() {
     }
 }
 
-export async function openDrillList() {
+export async function openDrillList(reloadDrillData = true) {
     drillListView.hidden = false
     addEditDrillView.hidden = true
 
     refreshFilterButtons()
 
     // refresh list
-    let success = await renderer.getDrills()
-    if (!success) {
-        let filePath = await renderer.getDataFilePath()
-        clearAlerts(drillListAlerts)
-        displayAlert(drillListAlerts, `An unexpected error occured when loading drills. Please check the file path:\n${filePath}`, alertSeverities.danger)
+    if (reloadDrillData) {
+        let success = await renderer.getDrills()
+        if (!success) {
+            let filePath = await renderer.getPath(["data"])
+            clearAlerts(drillListAlerts)
+            displayAlert(drillListAlerts, `An unexpected error occured when loading drills. Please check the file path:\n${filePath}`, alertSeverities.danger)
+        }
     }
 
     refreshListUI()
@@ -137,7 +139,13 @@ function constructDrillElement(drill) {
     element.querySelector(".drill_description").textContent = drill.description
     element.querySelector(".pin_hollow_image").hidden = drill.pinned
     element.querySelector(".pin_filled_image").hidden = !drill.pinned
-
+    
+    if (drill.pinned) {
+        element.classList.add("pinned_drill")
+    } else {
+        element.classList.remove("pinned_drill")
+    }
+    
     // add event tags
     if (drill.events) {
         let eventTags = element.querySelector(".event_tags")
@@ -180,8 +188,6 @@ function refreshListUI(randomSort = false) {
 
     // perform filtering
 
-    console.log(textSearchType.value)
-
     // filter by name & description input
     let terms = textSearchInput.value.trim().toLowerCase().split(" ")
     drillsToDisplay = drillsToDisplay.filter(drill => {
@@ -201,10 +207,6 @@ function refreshListUI(randomSort = false) {
         // return if name or description includes at least one of the terms
         return terms.some(term => textToSearch.toLowerCase().includes(term)); 
     })
-
-
-    // if (nameSearchString != "")
-    //     drillsToDisplay = drillsToDisplay.filter(d => d.pinned || d.name.toLowerCase().includes(nameSearchString))
 
     let selectedEvents = eventFiltersData.filter(x => x.selected).map(x => x.eventName)
     selectedEvents.forEach(event => {
@@ -300,6 +302,12 @@ function pinDrill(drillElement) {
     drillElement.dataset.pinned = drill.pinned
     drillElement.querySelector(".pin_hollow_image").hidden = drill.pinned
     drillElement.querySelector(".pin_filled_image").hidden = !drill.pinned
+
+    if (drill.pinned) {
+        drillElement.classList.add("pinned_drill")
+    } else {
+        drillElement.classList.remove("pinned_drill")
+    }
 
     if (drill.pinned) {
         // move to top
@@ -408,5 +416,11 @@ backupButton.addEventListener("click", async () => {
     }
 })
 
-resultLimitInput.addEventListener("change", () => limitResults())
+resultLimitInput.addEventListener("change", () => {
+    if (resultLimitInput.valueAsNumber == 0) {
+        resultLimitInput.value = ""
+    }
+
+    limitResults()
+})
 textSearchType.addEventListener("change", () => refreshListUI())

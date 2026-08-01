@@ -42,28 +42,28 @@
         </div>
 
         <div id="drill_list_controls">
-            <label for="name_search_input">
-                Filter by
-                <select id="text_search_type">
-                    <option value="name">Name</option>
-                    <option value="description">Description</option>
-                    <option value="both">Name & Desc</option>
-                </select>
-            </label>
-            <input id="name_search_input" type="text">
-            <!-- <div><label class="label_container">Sort by:</label></div>
-            <select>
-                <option value="default">Default</option>
-                <option value="name">Name</option>
-                <option value="date">Date Created</option>
-            </select> -->
+            <div>
+                <label for="name_search_input">
+                    Filter by
+                    <select id="text_search_type">
+                        <option value="name">Name</option>
+                        <option value="description">Description</option>
+                        <option value="both">Name & Desc</option>
+                    </select>
+                </label>
+                <input id="name_search_input" type="text">
 
-            <label id="result_limit_label" for="result_limit">Show Top:</label>
-            <input id="result_limit" type="number" min="0" step="1">
-
-            <button id="randomize_order_button">Randomize Order</button>
-            <button id="backup_button">Backup</button>
-            <button id="add_drill_button">Add Drill</button>
+                <div id="result_limit_container" class="horizontal_label_input_container">
+                    <label id="result_limit_label" for="result_limit">Show Top:</label>
+                    <input class="margin_left_5" id="result_limit" type="number" min="0" step="1">
+                </div>
+            </div>
+            
+            <div>
+                <button id="randomize_order_button">Randomize Order</button>
+                <button id="backup_button">Backup</button>
+                <button id="add_drill_button">Add Drill</button>
+            </div>
         </div>
 
         <div id="drill_list">
@@ -151,12 +151,6 @@
         </div>
     </div>
 
-
-
-    <div id="confirm_modal_outer_container" hidden>
-
-    </div>
-
     <div id="add_edit_event_level_modal" hidden>
         <div class="modal_background">
             <div class="modal">
@@ -182,12 +176,16 @@
                 </div>
 
                 <div class="modal_buttons">
-                    <button class="modal_no_button">Cancel</button>
                     <button class="modal_yes_button">Create</button>
+                    <button class="modal_no_button">Cancel</button>
                     <button id="delete_tag_button">Delete</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="confirm_modal_outer_container" hidden>
+
     </div>
 
     <!-- load javascript -->

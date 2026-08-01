@@ -45,6 +45,31 @@ export async function openConfirmModal(container, message = "Are you sure?") {
     })
 }
 
+export async function openErrorModal(container, message = "An Unexpected Error Occured.", buttonText = "Okay") {
+    container.innerHTML = `
+        <div class="modal_background">
+            <div class="modal">
+                <h3 class="modal_header">Are you sure?</h3>
+                <div class="modal_buttons">
+                    <button class="modal_yes_button">Yes</button>
+                </div>
+            </div>
+        </div>
+    `
+    
+    container.querySelector(".modal_header").innerText = message
+    container.querySelector(".modal_yes_button").innerText = buttonText
+    container.hidden = false
+    
+    return new Promise((resolve) => {
+        container.querySelector(".modal_yes_button").onclick = () => {
+            container.hidden = true;
+            container.innerHTML = ""
+            resolve(true)
+        }
+    })
+}
+
 export function displayAlert(container, message, alert_severity = "alert_info") {
     let element = createElementFromTemplate(`
         <div class="alert">
