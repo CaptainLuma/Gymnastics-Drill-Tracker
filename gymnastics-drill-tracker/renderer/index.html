@@ -120,26 +120,41 @@
                     <label id="input_drill_name_label" for="input_drill_name">Drill Name:</label>
                     <input type="text" id="input_drill_name">
                 </div>
-                <div>
-                    <div class="label_container margin_botton_1">
-                        <p>Events:</p>
-                        <button class="inline_button" id="add_event_button">Add New</button>
-                        <button class="inline_button" id="edit_events_button">Edit</button>
+                <div class="form_events_levels_image_container">
+                    <div>
+                        <div class="margin_bottom_2">
+                            <div class="label_container margin_bottom_1">
+                                <p>Events:</p>
+                                <button class="inline_button" id="add_event_button">Add New</button>
+                                <button class="inline_button" id="edit_events_button">Edit</button>
+                            </div>
+                            <div id="form_event_buttons">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="label_container margin_bottom_1">
+                                <p>Recommended Levels:</p>
+                                <button class="inline_button" id="add_level_button">Add New</button>
+                                <button class="inline_button" id="edit_levels_button">Edit</button>
+                            </div>
+                            <div id="form_level_buttons">
+                            </div>
+                        </div>
                     </div>
-                    <div id="form_event_buttons">
+                    <div id="form_image_container">
+                        <img alt="image thumbnail" id="form_image">
+                        <!-- <img src="../images/picture-filled.svg" alt="" id="form_image_empty_svg"> -->
+                        <!-- <svg id="form_image_empty_svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="#000000" d="M96 896a32 32 0 0 1-32-32V160a32 32 0 0 1 32-32h832a32 32 0 0 1 32 32v704a32 32 0 0 1-32 32H96zm315.52-228.48-68.928-68.928a32 32 0 0 0-45.248 0L128 768.064h778.688l-242.112-290.56a32 32 0 0 0-49.216 0L458.752 665.408a32 32 0 0 1-47.232 2.112zM256 384a96 96 0 1 0 192.064-.064A96 96 0 0 0 256 384z"/></svg> -->
+
+                        <div id="form_image_buttons">
+                            <button id="add_image_button">Set Image</button>
+                            <button id="remove_image_button">Remove</button>
+                        </div>
                     </div>
                 </div>
+                
                 <div>
-                    <div class="label_container margin_botton_1">
-                        <p>Recommended Levels:</p>
-                        <button class="inline_button" id="add_level_button">Add New</button>
-                        <button class="inline_button" id="edit_levels_button">Edit</button>
-                    </div>
-                    <div id="form_level_buttons">
-                    </div>
-                </div>
-                <div>
-                    <div class="label_container margin_botton_1"><label for="input_drill_description" class="form_label">Description:</label></div>
+                    <div class="label_container margin_bottom_1"><label for="input_drill_description" class="form_label">Description:</label></div>
                     <textarea id="input_drill_description" rows="5"></textarea>
                 </div>
             </div>
@@ -151,6 +166,9 @@
         </div>
     </div>
 
+
+
+    <!-- modals -->
     <div id="add_edit_event_level_modal" hidden>
         <div class="modal_background">
             <div class="modal">

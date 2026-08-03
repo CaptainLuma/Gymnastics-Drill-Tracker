@@ -180,6 +180,21 @@ function constructDrillElement(drill) {
         })
     }
 
+    // image
+    if (drill.image) {
+        const imgElement = document.createElement("img")
+        imgElement.src = `${renderer.drillImagesPath}/${drill.image}`
+        imgElement.classList.add("drill_image")
+
+        const imageContainer = document.createElement("div")
+        imageContainer.classList.add("drill_image_container")
+        
+        imageContainer.appendChild(imgElement)
+        element.querySelector(".drill_body").appendChild(imageContainer)
+    }
+
+
+
     return element
 }
 

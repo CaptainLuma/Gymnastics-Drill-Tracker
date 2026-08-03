@@ -136,12 +136,14 @@ select {
     gap: 10px;
 }
 
-.drill_header > div, .drill_body > div {
+.drill_header > div {
     padding: 5px 15px
 }
 
 .drill_body {
     background-color: var(--drill-secondary-background-color);
+    display: flex;
+    justify-content: space-between;
 }
 
 .drill_description {
@@ -149,7 +151,7 @@ select {
     margin-bottom: 15px;
 }
 
-.drill_body > div:first-of-type {
+.drill_body > div {
     padding: 15px;
 }
 
@@ -157,6 +159,20 @@ select {
     background-color: var(--drill-pinned-background-color);
 }
 
+.drill_image_container {
+    /* border: 2px solid lime; */
+    /* width: 200px;
+    height: 200px; */
+    display: block;
+    flex: 0 0 200px;
+    /* padding: 15px; */
+}
+
+.drill_image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
 
 /* .drill-body p {
     font-weight: 300;
@@ -355,7 +371,8 @@ input, textarea {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 5px;
+    column-gap: 5px;
+    row-gap: 10px;
 }
 
 .event_button,
@@ -418,6 +435,69 @@ input, textarea {
     background-color: var(--danger-color);
 }
 
+#form_image_container {
+    display: block;
+    /* width: 200px; */
+    flex: 0 0 200px;
+    height: fit-content;
+    background-color: var(--drill-secondary-background-color);
+    position: relative;
+}
+
+#form_image {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+#form_image_empty_svg > path {
+    width: 100%;
+    fill: var(--main-background-color)
+}
+
+.form_events_levels_image_container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+#form_image_buttons {
+    margin-top: 10px;
+    position: absolute;
+    bottom: 0px;
+    /* border: 2px solid lime; */
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.form_image_buttons_show {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+#form_image_container:hover #form_image_buttons {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    /* pointer-events: auto; */
+}
+
+#form_image_buttons button {
+    background-color: rgb(230, 230, 230);
+    color: black;
+    padding: 2px 10px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 15px;
+}
+
+
 /* generic classes */
 .border {
     border: 2px solid lime;
@@ -432,7 +512,7 @@ input, textarea {
     align-items: center;
 }
 
-.margin_botton_1 {
+.margin_bottom_1 {
     margin-bottom: 10px;
 }
 

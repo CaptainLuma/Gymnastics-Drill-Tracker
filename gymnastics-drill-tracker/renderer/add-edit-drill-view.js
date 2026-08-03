@@ -25,6 +25,16 @@ const formLevelButtonsElement = document.getElementById("form_level_buttons")
 let formEventButtonsData = [] // contains data about each form event button, including wether it has been selected or not
 let formLevelButtonsData = [] // contains data about each level event button, including wether it has been selected or not
 
+// image stuff
+let formDrillImageFileName = null
+
+const imageContainer = document.getElementById("form_image_container")
+const imageButtons = document.getElementById("form_image_buttons")
+const imageAddButton = document.getElementById("add_image_button")
+const imageRemoveButton = document.getElementById("remove_image_button")
+const imageEmptySVG = document.getElementById("form_image_empty_svg")
+const imageElement = document.getElementById("form_image")
+
 // main buttons
 const addEditSubmitButton = document.getElementById("add_edit_drill_submit")
 const cancelButton = document.getElementById("return_button")
@@ -78,6 +88,7 @@ export function openDrillForm(drillName = null) {
     // clear form values
     addEditDrillForm.name.value = ""
     addEditDrillForm.description.value = ""
+    formDrillImageFileName = null
 
     changesMade = false
 
@@ -102,6 +113,7 @@ export function openDrillForm(drillName = null) {
         // auto fill values
         addEditDrillForm.name.value = drill.name
         addEditDrillForm.description.value = drill.description
+        formDrillImageFileName = drill.image
 
         // set event buttons to active for events included in this drill
         formEventButtonsData.forEach(buttonData => {
@@ -125,6 +137,8 @@ export function openDrillForm(drillName = null) {
             }
         })
     }
+
+    refreshImageThumbnail()
 
     drillListView.hidden = true
     addEditDrillView.hidden = false
@@ -172,7 +186,8 @@ addEditSubmitButton.addEventListener("click", async (event) => {
         name: addEditDrillForm.name.value,
         description: addEditDrillForm.description.value,
         events: formEventButtonsData.filter(x => x.selected).map(x => x.eventName),
-        levels: formLevelButtonsData.filter(x => x.selected).map(x => x.levelName)
+        levels: formLevelButtonsData.filter(x => x.selected).map(x => x.levelName),
+        image: formDrillImageFileName
     }
 
     // validate input
@@ -207,7 +222,15 @@ addEditSubmitButton.addEventListener("click", async (event) => {
         renderer.addDrill(drill)
     }
 
-    await renderer.saveDrills() // TODO: stay on page and display error message if saving fails
+    let success = await renderer.saveDrills() // TODO: stay on page and display error message if saving fails
+
+    if (!success) {
+        clearAlerts(addEditDrillAlerts)
+        displayAlert(addEditDrillAlerts, `An unexpected error occured when trying to save the drill. This could be because another program is using the drills.json file.`, alertSeverities.danger)
+        return
+    }
+
+    renderer.deleteUnusedImages()
 
     clearAlerts(drillListAlerts)
     displayAlert(drillListAlerts, `Drill "${drill.name}" has been ${addEditMode == "edit" ? "edited" : "added"}.`, alertSeverities.info)
@@ -238,6 +261,8 @@ deleteDrillButton.addEventListener("click", async (event) => {
         renderer.removeDrill(editDrillOriginalName)
 
         await renderer.saveDrills()
+
+        renderer.deleteUnusedImages()
 
         clearAlerts(drillListAlerts)
         displayAlert(drillListAlerts, `Drill "${editDrillOriginalName}" has been deleted.`, alertSeverities.info)
@@ -417,7 +442,13 @@ tagModalElements.createButton.addEventListener("click", () => {
     addEditTagModal.hidden = true
 
     // save
-    renderer.saveEventsAndLevels()
+    let saveSuccess = renderer.saveEventsAndLevels()
+
+    if (!saveSuccess) {
+        clearAlerts(addEditDrillAlerts)
+        displayAlert(addEditDrillAlerts, `An unexpected error occured when trying to save the ${type}`, alertSeverities.danger)
+        return
+    }
 
     // refresh UI
     refreshEventAndLevelButtons()
@@ -466,3 +497,28 @@ tagModalElements.deleteButton.addEventListener("click", async () => {
     clearAlerts(addEditDrillAlerts)
     displayAlert(addEditDrillAlerts, `Succesfully deleted ${type}.`, alertSeverities.info)
 })
+
+function refreshImageThumbnail() {
+    if ((!formDrillImageFileName) || formDrillImageFileName.trim() == "") {
+        imageElement.src = "../images/picture-filled.svg"
+    } else {
+        imageElement.src = `${renderer.drillImagesPath}/${formDrillImageFileName}`
+    }
+}
+
+imageAddButton.addEventListener("click", async () => {
+    let userSelectedImage = await renderer.getAndCopyUserSelectedImage()
+
+    if (userSelectedImage)
+        formDrillImageFileName = userSelectedImage
+
+    // drillImageFileNameSpan.innerText = formDrillImageFileName ? formDrillImageFileName : ""
+    refreshImageThumbnail()
+})
+
+imageRemoveButton.addEventListener("click", () => {
+    formDrillImageFileName = null
+    refreshImageThumbnail()
+})
+
+// imageContainer.addEventListener("hover")

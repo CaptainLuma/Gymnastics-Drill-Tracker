@@ -1,5 +1,5 @@
 const fs = require('node:fs/promises');
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const Drill = require('./models/drill.js');
 const { describe } = require('node:test');
@@ -69,15 +69,22 @@ async function loadDrills() {
         let drillData = JSON.parse(data)
 
         // map json output to valid drills (this is partially to update older drills. Ex: if an older drill doesn't have a levels property, this will create it)
-        drillData = drillData.map(x => {
-            return {
-                name: x.name,
-                description: x.description,
-                events: x.events ? x.events : [],
-                levels: x.levels ? x.levels : [],
-                pinned: x.pinned ? x.pinned : false,
-            }
-        })
+        // drillData = drillData.map(x => {
+        //     return {
+        //         name: x.name,
+        //         description: x.description,
+        //         events: x.events ? x.events : [],
+        //         levels: x.levels ? x.levels : [],
+        //         pinned: x.pinned ? x.pinned : false,
+        //         image: x.image
+        //     }
+        // })
+
+        drillData.forEach(drill => {
+            drill.events = drill.events ? drill.events : []
+            drill.levels = drill.levels ? drill.levels : []
+            drill.pinned = drill.pinned ? drill.pinned : false
+        });
 
         return drillData
     } catch (error) {
@@ -125,8 +132,10 @@ async function saveDrills(drills) {
         await fs.writeFile(filePath, data, 'utf8');
 
         console.log(`Saved ${drills.length} drills.`);
+        return true
     } catch (error) {
         console.error('Failed to save drills:', error);
+        return false
     }
 }
 
@@ -150,21 +159,14 @@ async function saveEvents(events) {
         await fs.writeFile(filePath, data, 'utf8');
 
         console.log(`Saved ${events.length} events.`);
+        return true
     } catch (error) {
         console.error('Failed to save events:', error);
+        return false
     }
 }
 
 async function saveLevels(levels) {
-    // convert levels to list
-    // let levels = []
-    // for (let [key, value] of Object.entries(levelsDict)) {
-    //     levels.push({
-    //         name: key,
-    //         backgroundColor: value.backgroundColor
-    //     })
-    // }
-
     try {
         // Make sure the destination directory exists
         await fs.mkdir(path.join(__dirname, 'data'), { recursive: true });
@@ -175,8 +177,10 @@ async function saveLevels(levels) {
         await fs.writeFile(filePath, data, 'utf8');
 
         console.log(`Saved ${levels.length} levels.`);
+        return true
     } catch (error) {
         console.error('Failed to save levels:', error);
+        return false
     }
 }
 
@@ -189,6 +193,99 @@ async function copyAndRenameFile(sourcePath, destinationDir, newFileName) {
   await fs.copyFile(sourcePath, destinationPath);
 
   return destinationPath;
+}
+
+async function getFileExists(pathElements) {
+    const fullPath = path.join(__dirname, ...pathElements)
+
+    try {
+        await fs.access(fullPath);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function getAndCopyUserSelectedImage() {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: "Select Drill Image",
+        properties: ["openFile"],
+        filters: [
+            {
+                name: "Images",
+                extensions: [
+                    "png",
+                    "jpg",
+                    "jpeg",
+                    "webp",
+                    "bmp",
+                    "svg"
+                ]
+            }
+        ]
+    });
+
+    if (canceled || filePaths.length === 0) {
+        return null;
+    }
+
+    const sourcePath = filePaths[0];
+
+    const destinationDirectory = path.join(
+        __dirname,
+        "data",
+        "drill-images"
+    );
+
+    await fs.mkdir(destinationDirectory, { recursive: true });
+
+    const parsed = path.parse(sourcePath);
+
+    let fileName = parsed.base;
+    let destinationPath = path.join(destinationDirectory, fileName);
+
+    // ensure name is unqiue
+    let counter = 1
+    while (await getFileExists(["data", "drill-images", fileName])) {
+        fileName = `${parsed.name} (${counter})${parsed.ext}`;
+        destinationPath = path.join(destinationDirectory, fileName);
+        counter++;
+    }
+
+    await fs.copyFile(sourcePath, destinationPath);
+
+    return fileName;
+}
+
+async function getFileNames(directory) {
+    const entries = await fs.readdir(directory, { withFileTypes: true });
+
+    return entries
+        .filter(entry => entry.isFile())
+        .map(entry => entry.name);
+}
+
+async function deleteUnusedImages(fileNames) {
+    const directory = path.join(__dirname, "data", "drill-images");
+
+    let deletedFileNames = []
+    for (const fileName of fileNames) {
+        const filePath = path.join(directory, fileName);
+
+        try {
+            const stats = await fs.stat(filePath);
+
+            // Only delete regular files, never directories.
+            if (stats.isFile()) {
+                await fs.unlink(filePath);
+                deletedFileNames.push(fileName)
+            }
+        } catch {
+            console.log(`failed to delete image: ${fileName}`)    
+        }
+    }
+
+    return deletedFileNames
 }
 
 ipcMain.handle("getDrills", async () => {
@@ -204,18 +301,15 @@ ipcMain.handle("getLevels", async () => {
 })
 
 ipcMain.handle("saveDrills", async (event, drills) => {
-    await saveDrills(drills)
-    return
+    return await saveDrills(drills)
 })
 
 ipcMain.handle("saveEvents", async (event, events) => {
-    await saveEvents(events)
-    return
+    return await saveEvents(events)
 })
 
 ipcMain.handle("saveLevels", async (event, levels) => {
-    await saveLevels(levels)
-    return
+    return await saveLevels(levels)
 })
 
 ipcMain.handle("backupFiles", async () => {
@@ -248,16 +342,21 @@ ipcMain.handle("backupFiles", async () => {
 })
 
 ipcMain.handle("getFileExists", async (event, pathElements) => {
-    const fullPath = path.join(__dirname, ...pathElements)
-
-    try {
-        await fs.access(fullPath);
-        return true;
-    } catch {
-        return false;
-    }
+    return await getFileExists(pathElements)
 })
 
 ipcMain.handle("getPath", (event, pathElements) => {
     return path.join(__dirname, ...pathElements)
+})
+
+ipcMain.handle("getAndCopyUserSelectedImage", async () => {
+    return await getAndCopyUserSelectedImage()
+})
+
+ipcMain.handle("getFileNames", async (event, directory) => {
+    return await getFileNames(directory)
+})
+
+ipcMain.handle("deleteUnusedImages", async (event, fileNames) => {
+    return await deleteUnusedImages(fileNames)
 })

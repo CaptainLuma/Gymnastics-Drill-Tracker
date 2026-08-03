@@ -22,6 +22,8 @@ export let levelData = {}
 
 let loadSuccessful = false
 
+export let drillImagesPath = ""
+
 // alerts
 const drillListAlerts = document.getElementById("drill_list_alert_container")
 const alertSeverities = {
@@ -78,16 +80,18 @@ export function getDrill(drillName) {
 }
 
 export async function saveDrills() {
-    if (!loadSuccessful) return // don't save if couldn't successfully load data. This could result in loss of data
+    if (!loadSuccessful) return false // don't save if couldn't successfully load data. This could result in loss of data
     
-    await window.ipcRenderer.invoke("saveDrills", drills)
+    return await window.ipcRenderer.invoke("saveDrills", drills)
 }
 
 export async function saveEventsAndLevels() {
     if (!loadSuccessful) return
     
-    await window.ipcRenderer.invoke("saveEvents", eventData)
-    await window.ipcRenderer.invoke("saveLevels", levelData)
+    const eventsSaved = await window.ipcRenderer.invoke("saveEvents", eventData)
+    const levelsSaved = await window.ipcRenderer.invoke("saveLevels", levelData)
+
+    return eventsSaved && levelsSaved
 }
 
 export function removeDrill(drillName) {
@@ -98,9 +102,14 @@ export function addDrill(drill) {
     drills.unshift(drill)
 }
 
-export function editDrill(drillName, drill) {
-    let indexOfDrill = drills.findIndex(d => d.name === drillName)
-    drills[indexOfDrill] = drill
+export function editDrill(drillName, editedDrill) {
+    let originalDrill = getDrill(drillName)
+
+    originalDrill.name = editedDrill.name
+    originalDrill.description = editedDrill.description
+    originalDrill.events = editedDrill.events
+    originalDrill.levels = editedDrill.levels
+    originalDrill.image = editedDrill.image
 }
 
 export function openDrillListView() {
@@ -118,6 +127,32 @@ export async function backupFiles() {
 
 export async function getPath(pathElements) {
     return await window.ipcRenderer.invoke("getPath", pathElements)
+}
+
+export async function getAndCopyUserSelectedImage() {
+    return await window.ipcRenderer.invoke("getAndCopyUserSelectedImage")
+}
+
+async function getFileNames(directory) {
+    return await window.ipcRenderer.invoke("getFileNames", directory)
+}
+
+export async function getDrillImageNames() {
+    return await getFileNames(await getPath(["data", "drill-images"]))
+}
+
+export async function deleteUnusedImages() {
+    let registeredImages = await getDrillImageNames()
+
+    let unusedImages = registeredImages.filter(img => {
+        return !drills.some(drill => drill.image == img)
+    })
+
+    // delete unused images
+    if (unusedImages.length > 0) {
+        window.ipcRenderer.invoke("deleteUnusedImages", unusedImages)
+            // .then(deletedFileNames => console.log(`deleted ${deletedFileNames.length} unused images.`, deletedFileNames))
+    }
 }
 
 async function initialize() {
@@ -178,9 +213,13 @@ async function initialize() {
 
     loadSuccessful = true
 
+    drillImagesPath = await window.ipcRenderer.invoke("getPath", ["data", "drill-images"])
+
     // initialize pages
     drillListView.onAppStart()
     addEditDrillView.onAppStart()
+
+    console.log(drills)
 
     // open drills list
     openDrillListView(false)
