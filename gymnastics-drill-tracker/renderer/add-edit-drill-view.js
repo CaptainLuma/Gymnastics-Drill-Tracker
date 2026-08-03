@@ -273,8 +273,8 @@ deleteDrillButton.addEventListener("click", async (event) => {
 })
 
 formEventButtonsElement.addEventListener("click", (e) => {
-    changesMade = true
     if (e.target.classList.contains("event_button")) {
+        changesMade = true
         const buttonData = formEventButtonsData.find(x => x.element == e.target)
         if (buttonData) {
             buttonData.selected = !buttonData.selected
@@ -291,8 +291,8 @@ formEventButtonsElement.addEventListener("click", (e) => {
 })
 
 formLevelButtonsElement.addEventListener("click", (e) => {
-    changesMade = true
     if (e.target.classList.contains("level_button")) {
+        changesMade = true
         const buttonData = formLevelButtonsData.find(x => x.element == e.target)
         if (buttonData) {
             buttonData.selected = !buttonData.selected
