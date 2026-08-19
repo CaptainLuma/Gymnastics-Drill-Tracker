@@ -5,7 +5,7 @@ const Drill = require('./models/drill.js');
 const { describe } = require('node:test');
 const { spawn } = require("node:child_process")
 
-const isDev = process.env.NODE_ENV !== "production"
+const isDev = !app.isPackaged;
 const isMac = process.platform === 'darwin'
 
 let mainWindow

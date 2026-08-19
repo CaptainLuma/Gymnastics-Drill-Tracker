@@ -5,7 +5,8 @@
   "description": "App for managing and tracking gymnastics drills",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager . --no-asar --ignore=data --out=builds --overwrite"
   },
   "author": "Aaron",
   "license": "MIT",
@@ -16,5 +17,12 @@
     "patterns": [
       "!data/**"
     ]
+  },
+  "build": {
+    "appId": "com.LumaDev.GymnasticsDrillTracker",
+    "files": "!data"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0"
   }
 }
