@@ -155,6 +155,11 @@ export async function deleteUnusedImages() {
     }
 }
 
+export async function exportPinnedDrills() {
+    const prinnedDrills = drills.filter(d => d.pinned)
+    return await window.ipcRenderer.invoke("exportDrills", prinnedDrills)
+}
+
 async function initialize() {
     let drillsFileExists = await window.ipcRenderer.invoke("getFileExists", ["data", "drills.json"])
     let eventsFileExists = await window.ipcRenderer.invoke("getFileExists", ["data", "events.json"])
@@ -218,8 +223,6 @@ async function initialize() {
     // initialize pages
     drillListView.onAppStart()
     addEditDrillView.onAppStart()
-
-    console.log(drills)
 
     // open drills list
     openDrillListView(false)

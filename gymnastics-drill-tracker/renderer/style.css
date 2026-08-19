@@ -45,6 +45,11 @@ select {
     /* height: min-content; */
 }
 
+ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+}
+
 #main {
     /* for some reason the scollbar appears without this line */
     border: 2px solid transparent;
@@ -65,6 +70,13 @@ select {
     flex-wrap: wrap;
 }
 
+#drill_list_buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+}
+
 @media (width < 1000px) {
     #drill_list_controls {
         flex-direction: column;
@@ -82,6 +94,7 @@ select {
 #drill_list_view {
     padding: 30px;
     max-width: 1100px;
+    /* max-width: 900px; */
     margin: auto;
     box-sizing: border-box;
 }
@@ -164,8 +177,14 @@ select {
     /* width: 200px;
     height: 200px; */
     display: block;
-    flex: 0 0 200px;
+    flex: 0 0 250px;
     /* padding: 15px; */
+}
+
+@media (width < 1000px) {
+    .drill_image_container {
+        flex: 0 0 200px;
+    }
 }
 
 .drill_image {

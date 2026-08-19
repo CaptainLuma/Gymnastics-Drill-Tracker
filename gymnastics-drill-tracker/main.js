@@ -1,8 +1,9 @@
 const fs = require('node:fs/promises');
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron')
 const path = require('path')
 const Drill = require('./models/drill.js');
 const { describe } = require('node:test');
+const { spawn } = require("node:child_process")
 
 const isDev = process.env.NODE_ENV !== "production"
 const isMac = process.platform === 'darwin'
@@ -288,6 +289,46 @@ async function deleteUnusedImages(fileNames) {
     return deletedFileNames
 }
 
+async function exportDrillsAsMarkdown(drills) {
+    const exportsDir = path.join(__dirname, "data", "exports");
+
+    // Create exports directory if it doesn't exist
+    await fs.mkdir(exportsDir, { recursive: true });
+
+    // Generate filename from current date/time
+    const now = new Date();
+    const timestamp = now
+        .toISOString()
+        .replace(/T/, "_")
+        .replace(/:/g, "-")
+        .replace(/\..+/, "");
+
+    const filePath = path.join(exportsDir, `${timestamp}.md`);
+
+    // Generate Markdown
+    const markdown = drills
+        .map(drill => `- ${drill.name}:\n  - ${drill.description}`)
+        .join("\n");
+
+    // Write file
+    await fs.writeFile(filePath, markdown, "utf8");
+
+    // Open the directory in the OS file explorer
+    // await shell.openPath(exportsDir);
+
+    // open the file
+    spawn("notepad.exe", [filePath], {
+        detached: true,
+        stdio: "ignore"
+    }).unref();
+
+    return filePath;
+}
+
+
+
+
+
 ipcMain.handle("getDrills", async () => {
     return await loadDrills()
 })
@@ -359,4 +400,8 @@ ipcMain.handle("getFileNames", async (event, directory) => {
 
 ipcMain.handle("deleteUnusedImages", async (event, fileNames) => {
     return await deleteUnusedImages(fileNames)
+})
+
+ipcMain.handle("exportDrills", async (event, drills) => {
+    return await exportDrillsAsMarkdown(drills)
 })

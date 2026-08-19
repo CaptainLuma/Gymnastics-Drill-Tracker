@@ -158,3 +158,46 @@ export function hexToRgb(hex) {
 
     return `rgb(${r}, ${g}, ${b})`;
 }
+
+export function stringToDOM(text) {
+    const container = document.createElement("div");
+
+    const lines = String(text ?? "")
+        .replace(/\r\n?/g, "\n")
+        .split("\n");
+
+    let currentList = null;
+
+    for (const rawLine of lines) {
+        const line = rawLine.trimEnd();
+        const match = line.match(/^\s*-\s*(.*)$/);
+
+        if (match) {
+            // Start a list if necessary
+            if (!currentList) {
+                currentList = document.createElement("ul");
+                container.appendChild(currentList);
+            }
+
+            const li = document.createElement("li");
+            li.textContent = match[1];
+            currentList.appendChild(li);
+
+        } else {
+            // A normal line ends the current list
+            currentList = null;
+
+            if (line.trim() === "") {
+                // Preserve the blank line
+                container.appendChild(document.createElement("br"));
+                continue;
+            }
+
+            const p = document.createElement("p");
+            p.textContent = line;
+            container.appendChild(p);
+        }
+    }
+
+    return container;
+}

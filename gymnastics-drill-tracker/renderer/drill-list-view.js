@@ -4,7 +4,8 @@ import {
     clearAlerts, 
     getMovedToFront, 
     animateReposition,
-    shuffle } from "./helpers.js"
+    shuffle,
+    stringToDOM } from "./helpers.js"
 import * as renderer from "./renderer.js"
 
 // drill list page elements
@@ -36,6 +37,11 @@ const alertSeverities = {
     info: "alert_info",
     danger: "alert_danger"
 }
+
+const exportPinnedButton = document.getElementById("export_pinned_button")
+
+// modals
+const confirmModalContainer = document.getElementById("confirm_modal_outer_container")
 
 /**
  * actions to be performed only once (when the app starts)
@@ -120,7 +126,7 @@ function constructDrillElement(drill) {
         </div>
         <div class="drill_body" hidden>
             <div>
-                <p class="drill_description"></p>
+                <div class="drill_description"></div>
                 <p class="level_tags_label">Recommended Levels:</p>
                 <div class="level_tags">
 
@@ -135,11 +141,15 @@ function constructDrillElement(drill) {
     element.dataset.id = drill.name
     element.dataset.pinned = drill.pinned
     element.dataset.expanded = "false"
-    element.querySelector(".drill_name").textContent = drill.name
-    element.querySelector(".drill_description").textContent = drill.description
+    element.querySelector(".drill_name").textContent = drill.name // use textContent so that it ignores new lines
     element.querySelector(".pin_hollow_image").hidden = drill.pinned
     element.querySelector(".pin_filled_image").hidden = !drill.pinned
     
+    element.querySelector(".drill_description").innerText = drill.description
+    // let formattedDescription = stringToDOM(drill.description)
+    // element.querySelector(".drill_description").appendChild(formattedDescription)
+
+
     if (drill.pinned) {
         element.classList.add("pinned_drill")
     } else {
@@ -150,13 +160,21 @@ function constructDrillElement(drill) {
     if (drill.events) {
         let eventTags = element.querySelector(".event_tags")
         drill.events.forEach(eventID => {
-            if (!renderer.eventData[eventID]) {
-                console.log(`drill contains event which is not recognized: "${eventID}"`)
-                return
-            }
-
             let tag = document.createElement("button")
             tag.classList.add("event_tag")
+
+            if (!renderer.eventData[eventID]) {
+                console.log(`drill contains event which is not recognized: "${eventID}"`)
+                
+                tag.innerText = eventID
+                tag.style.backgroundColor = "rgb(230, 0, 0)"
+                eventTags.appendChild(tag)
+
+                clearAlerts(drillListAlerts)
+                displayAlert(drillListAlerts, "drill(s) found with unrecognized events. (highlighted in red)", alertSeverities.danger)
+                return
+            }
+            
             tag.innerText = renderer.eventData[eventID].displayName
             tag.style.backgroundColor = renderer.eventData[eventID].backgroundColor
             eventTags.appendChild(tag)
@@ -167,13 +185,21 @@ function constructDrillElement(drill) {
     if (drill.levels) {
         let levelTags = element.querySelector(".level_tags")
         drill.levels.forEach(levelID => {
+            let tag = document.createElement("button")
+            tag.classList.add("level_tag")
+
             if (!renderer.levelData[levelID]) {
                 console.log(`drill contains level which is not recognized: "${levelID}"`)
+
+                tag.innerText = eventID
+                tag.style.backgroundColor = "rgb(230, 0, 0)"
+                levelTags.appendChild(tag)
+
+                clearAlerts(drillListAlerts)
+                displayAlert(drillListAlerts, "drill(s) found with unrecognized levels. (highlighted in red)", alertSeverities.danger)
                 return
             }
 
-            let tag = document.createElement("button")
-            tag.classList.add("level_tag")
             tag.innerText = renderer.levelData[levelID].displayName
             tag.style.backgroundColor = renderer.levelData[levelID].backgroundColor
             levelTags.appendChild(tag)
@@ -192,8 +218,6 @@ function constructDrillElement(drill) {
         imageContainer.appendChild(imgElement)
         element.querySelector(".drill_body").appendChild(imageContainer)
     }
-
-
 
     return element
 }
@@ -439,3 +463,11 @@ resultLimitInput.addEventListener("change", () => {
     limitResults()
 })
 textSearchType.addEventListener("change", () => refreshListUI())
+
+exportPinnedButton.addEventListener("click", async () => {
+    const filePath = await renderer.exportPinnedDrills()
+
+    // display alert
+    clearAlerts(drillListAlerts)
+    displayAlert(drillListAlerts, `exported drills to path: "${filePath}"`)
+})
