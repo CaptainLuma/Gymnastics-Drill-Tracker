@@ -1,7 +1,6 @@
 const fs = require('node:fs/promises');
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron')
 const path = require('path')
-const Drill = require('./models/drill.js');
 const { describe } = require('node:test');
 const { spawn } = require("node:child_process")
 
